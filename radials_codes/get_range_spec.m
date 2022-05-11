@@ -1,4 +1,4 @@
-%% get_degrees_files.m
+%% get_range_spec.m
 function P_out = get_range_spec(deg_file, r, target_range, num_of_ranges, output_type)
 %% Inputs
 % deg_file - radial specturm file [ranges X frequency]
@@ -15,12 +15,21 @@ function P_out = get_range_spec(deg_file, r, target_range, num_of_ranges, output
 
     P = open_ascii_radial_spectrum(deg_file);
     
-%----------------- remove negative radials if appear ----------------------%
-
+%---------------- remove negative radials if appear ----------------------%
+    id_neg = find(r < 0);
+    if ~isempty(id_neg)
+        r(id_neg) = [];
+    end
+    
     if size(P, 1) ~= length(r)
         diff_r = length(r) - size(P, 1);
-        r = r(diff_r+1:end);
+        r = r(1 : end-diff_r);
     end
+    
+%     if size(P, 1) ~= length(r)
+%         diff_r = length(r) - size(P, 1);
+%         r = r(diff_r+1:end);
+%     end
 
 %--------------- find indices of closest range cells ---------------------%
     

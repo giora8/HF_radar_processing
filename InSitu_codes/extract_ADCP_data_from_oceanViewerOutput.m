@@ -1,7 +1,7 @@
 %% load ADCP .mat data %%
 
 %load('S100287A004_AshkelonA15_0012_4.mat');
-load('C:\Giora\TAU\MEPlab\HF_Radar\files\ADCP_files\BURSTV_1.mat');
+load('C:\Giora\TAU\MEPlab\HF_Radar\files\InSitu_files\ADCP_Ashkelon_MarchMay2021\BURSTV_1.mat');
 
 %% extracting relevant data %
 
@@ -59,7 +59,8 @@ z = z(1:56);
 
 %%
 
-Vr = crop_u*cos(deg2rad(30)) + crop_v*cos(deg2rad(60));
+%Vr = crop_u*cos(deg2rad(30)) - crop_v*cos(deg2rad(60));
+Vr = crop_u*cos(deg2rad(30)) + crop_v*sin(deg2rad(30));
 Vtheta = crop_u*sin(deg2rad(30)) + crop_v*sin(deg2rad(60));
 
 %%

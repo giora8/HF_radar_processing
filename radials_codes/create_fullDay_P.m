@@ -99,7 +99,7 @@ fbragg_day = zeros(length(filenames), 1);
         
     end
 
-new_dirname = strcat(HF_station_id, '_R_', num2str(R), '_ang_', num2str(ANG-N_angs), '_', num2str(ANG+N_angs));
+new_dirname = strcat(HF_station_id, '_R_', num2str(R), '_Ncells_', num2str(N_range_cells), '_ang_', num2str(ANG-N_angs), '_', num2str(ANG+N_angs));
 targetPath = strcat(basic_path, new_dirname);
 if ~exist(targetPath, 'dir')
    mkdir(targetPath)

@@ -17,11 +17,7 @@ function P = open_ascii_radial_spectrum(fname)
     fclose(fid);
 
 %-------------- reshape to [Range Cell X Frequency] size -----------------%
-    try
-        P = reshape(P_unshaped, time_dim, length(P_unshaped)/ time_dim)';
-    catch
-        a=1;
-    end
+    P = reshape(P_unshaped, time_dim, length(P_unshaped)/ time_dim)';
     
 end
 

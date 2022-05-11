@@ -1,8 +1,9 @@
 %% find_ivonin_peaks.m
-function [f_peaks, partial_f_mat, partial_P_mat] = find_ivonin_peaks(P, undisturbed_vals, freq_norm, plt_flag, method)
+function [f_peaks, sig_vals, acc_vals, partial_f_mat, partial_P_mat] = find_ivonin_peaks(P, undisturbed_vals, freq_norm, plt_flag, method)
 %% Inputs
 % P - backscattered Doppler spectra of size 1 X 512
 % undisturbed_vals - normalized frequencies of theoretical backscattered
+% [negaative part [psitive part]
 % waves
 % freq_norm - frequency axis of size 1 X 512
 % plt_flag - true for plot peaks
@@ -29,12 +30,16 @@ function [f_peaks, partial_f_mat, partial_P_mat] = find_ivonin_peaks(P, undistur
         undisturbed_ids(cur_peak, 2) = cur_id_pos ;
     end
     
-%--------------create window next to each undisturbed peak-----------------
+%--------------create window next to each undisturbed peak----------------%
 
     freq_step = freq_norm(2) - freq_norm(1);
     window_size = 0.15 ; % [f_B]
-    %window_size = 0.25 ; % [f_B]
+    %window_size = 0.05 ; % [f_B]
     expand_ids = ceil(window_size / freq_step);
+    
+    if strcmp(method, 'WERA')
+        expand_ids = length(freq_norm)/64;
+    end
     
     window_inds = zeros(numel(undisturbed_ids), 2);
     for cur_win = 1 : size(window_inds, 1)
@@ -43,7 +48,7 @@ function [f_peaks, partial_f_mat, partial_P_mat] = find_ivonin_peaks(P, undistur
         window_inds(cur_win, 2) = undisturbed_ids(a, b) + expand_ids;
     end
 
-%------------------find maximal peak in each window------------------------
+%------------------find maximal peak in each window-----------------------%
    
     if(plt_flag == 1)
         N = numel(undisturbed_vals);
@@ -54,12 +59,17 @@ function [f_peaks, partial_f_mat, partial_P_mat] = find_ivonin_peaks(P, undistur
     f_peaks = zeros(size(undisturbed_vals));
     partial_f_mat = zeros(size(undisturbed_vals, 1), 1+window_inds(1, 2)-window_inds(1, 1));
     partial_P_mat = zeros(size(undisturbed_vals, 1), 1+window_inds(1, 2)-window_inds(1, 1));
+    sig_vals = zeros(size(undisturbed_vals));
+    acc_vals = zeros(size(undisturbed_vals));
+    
     for cur_spec = 1 : numel(undisturbed_ids)
 
     % locate peak next to undisturbed values %
 
         partial_f = freq_norm(window_inds(cur_spec, 1):window_inds(cur_spec, 2));
         partial_P = P(window_inds(cur_spec, 1):window_inds(cur_spec, 2));
+        
+        noise = get_noise_value(P);
         
         if plt_flag == 1
             figure(2); hold on;
@@ -90,34 +100,52 @@ function [f_peaks, partial_f_mat, partial_P_mat] = find_ivonin_peaks(P, undistur
         
         % return peak values for 'max' option
         
-        if strcmp(method, 'max')
-            if (~isempty(peak))
-                [~, max_id] = max(vals);
-                f_peaks(a, b) = partial_f(peak(max_id));
-            else
-                f_peaks(a, b) = 0;  % if could not detect peak - fill with zero
-            end
-            
-        % return peak values for 'centroid' option
-        
-        else
-            if strcmp(method, 'centroid')
-                %% temp add-on
+            if strcmp(method, 'max')
                 if (~isempty(peak))
                     [~, max_id] = max(vals);
                     f_peaks(a, b) = partial_f(peak(max_id));
+                    [wera_peak, snr] = getWERACurrent(partial_f, partial_P, noise);
+                    [sig, acc] = getAcc(partial_f, snr, wera_peak);
+                    sig_vals(a, b) = sig;
+                    acc_vals(a, b) = acc;
                 else
                     f_peaks(a, b) = 0;  % if could not detect peak - fill with zero
                 end
-                temp_id = find(ismember(freq_norm, f_peaks(cur_spec)));
-                partial_f = freq_norm(temp_id-expand_ids:temp_id+expand_ids);
-                partial_P = P(window_inds(cur_spec, 1):window_inds(cur_spec, 2));
-                %%
-                f_peaks(a, b) = trapz(partial_f, partial_f .* partial_P) / trapz(partial_f, partial_P);
-            end
 
-        end
-        
+            % return peak values for 'centroid'\'WERA' option
+
+            else
+                if ~strcmp(method, 'max')
+                    %% centroid OR WERA methods
+                    if (~isempty(peak))
+                        [~, max_id] = max(vals);
+                        f_peaks(a, b) = partial_f(peak(max_id));
+                    else
+                        f_peaks(a, b) = 0;  % if could not detect peak - fill with zero
+                    end
+
+                    temp_id = find(ismember(freq_norm, f_peaks(cur_spec)));
+                    partial_f = freq_norm(temp_id-expand_ids:temp_id+expand_ids);
+                    partial_P = P(temp_id-expand_ids:temp_id+expand_ids);
+                    %partial_P = P(window_inds(cur_spec, 1):window_inds(cur_spec, 2));
+
+                    [wera_peak, snr] = getWERACurrent(partial_f, partial_P, noise);
+                    [sig, acc] = getAcc(partial_f, snr, wera_peak);
+                        %%
+                        if strcmp(method, 'centroid')
+                            peak_loc = trapz(partial_f, partial_f .* db2pow(partial_P)) / trapz(partial_f, db2pow(partial_P));
+                            f_peaks(a, b) = peak_loc;
+
+                        else
+                            if strcmp(method, 'WERA')
+                                f_peaks(a, b) = wera_peak;
+                            end
+                        end
+                end
+            end
+     
+        sig_vals(a, b) = sig;
+        acc_vals(a, b) = acc;
     end
     
 end

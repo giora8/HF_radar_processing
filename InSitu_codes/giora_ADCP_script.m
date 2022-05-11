@@ -1,5 +1,5 @@
-path1 = 'C:\Giora\TAU\MEPlab\HF_Radar\files\ADCP_files\BURSTV_1.mat';
-path2 = 'C:\Giora\TAU\MEPlab\HF_Radar\files\ADCP_files\BURSTV_2.mat';
+path1 = 'C:\Giora\TAU\MEPlab\HF_Radar\files\InSitu_files\ADCP_Ashkelon_MarchMay2021\BURSTV_1.mat';
+path2 = 'C:\Giora\TAU\MEPlab\HF_Radar\files\InSitu_files\ADCP_Ashkelon_MarchMay2021\BURSTV_2.mat';
 
 % extracting basic measurements
 
@@ -28,7 +28,10 @@ r_hat = 300;  % azimuth of the radial with respect to the north
 alpha_u = r_hat - 270;
 alpha_v = r_hat - 240;
 
-Vr = u .* cos(deg2rad(alpha_u)) - v .* cos(deg2rad(alpha_v));
-Vtheta = u .* sin(deg2rad(alpha_u)) + v .* sin(deg2rad(alpha_v));
+%Vr = u .* cos(deg2rad(alpha_u)) - v .* cos(deg2rad(alpha_v));
+%Vtheta = u .* sin(deg2rad(alpha_u)) + v .* sin(deg2rad(alpha_v));
 
-plotCompHF2ADCP(x_plot, U_all_filt, Vr, Vtheta, t, z, 60, Fs, 1);
+Vr = u .* cos(deg2rad(330)) + v .* sin(deg2rad(330));
+Vtheta = -u .* sin(deg2rad(330)) + v .* cos(deg2rad(330));
+
+%plotCompHF2ADCP(x_plot, U_all_filt, Vr, Vtheta, t, z, 60, Fs, 1);
