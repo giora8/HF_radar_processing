@@ -7,6 +7,7 @@ function [deg_file_list, angle_list] = get_degrees_files(file_path, filename, cl
 % num_of_angles - number of angles wants to be consider
 %% Output
 % deg_file_list - list of deg files wants to be consider
+% angle_list - angle value for each degree file
 %
 %--------- get all deg files related to specific .SORT file --------------%
 

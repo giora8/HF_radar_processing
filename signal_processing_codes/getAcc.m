@@ -5,8 +5,8 @@ function [sig, acc] = getAcc(freq, snr, Vr_wera)
 % snr - signal to noise ratio [dB]
 % Vr_wera - centroid frequency wieghted using the snr
 %% Output
-% sig: variance of the radial velocity
-% acc: accuracy measure for the radial velocity
+% sig - variance of the radial velocity
+% acc - accuracy measure for the radial velocity
 %
     K = length(freq);
     snr_lin = db2pow(snr);

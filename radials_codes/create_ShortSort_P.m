@@ -1,23 +1,30 @@
-function P_shortSort = create_ShortSort_P(wera_day, params_path, hhmm, destination_coord, HF_station_id, N_range_cells, N_angs)
+%% create_ShortSort_P.m
+function P_shortSort = create_ShortSort_P(syn_path, wera_day, params_path, hhmm, destination_coord, HF_station_id, N_range_cells, N_angs)
 %% Inputs
+% syn_path - Synology drive path ('Z:')
 % wera_day - YYYYDDD format (example: '2021083')
+% params_path - (str) path to relevant folder of relevant short sort
+% parameters
+% hhmm - (str) time in format of hhmm
+% destination_coord - [longitude latitude] coordinates of the target
+% HF_station_id - (string) station name 'is1' or 'is2'
+% N_range_cells - (int) number of distances to average
+% N_angs - (int) number of angles to average
 %% Output
 % P_shortSort - spectrum of all range in the .asc file
 %
-    T_chirp = 0.26;
+
     id_bar = strfind(params_path, '_');
     params_path = char(params_path);
     size_t = str2double(params_path(id_bar(1)+1: id_bar(2)-1));
-    
-    N_meas_per_sort = round(17.75 / (size_t * T_chirp / 60));
-    
+        
     if strcmp(HF_station_id, 'is1')
         HF_station = [34.545 31.665]; % (longitude, latitude) - ASHKELON
     else
         HF_station = [34.63583 31.83055]; % (longitude, latitude) - ASHDOD
     end
     
-    basic_path = 'Z:\radials_spectrum_shortSort\';
+    basic_path = strcat(syn_path, '\radials_spectrum_shortSort\');
     day_path = strcat(basic_path, params_path, '\', HF_station_id, '\', wera_day, '\');
     
     [R, ANG] = get_station_angle_radi(HF_station, destination_coord);
@@ -31,9 +38,10 @@ function P_shortSort = create_ShortSort_P(wera_day, params_path, hhmm, destinati
     else
         hhmm_char = string(hhmm);
     end
-    sort_path = char(strcat('Z:\data\', HF_station_id, '\raw\', year, '\', day, '\', wera_day, hhmm_char, '_', HF_station_id, '.SORT'));
+    sort_path = char(strcat(syn_path, '\data\', HF_station_id, '\raw\', year, '\', day, '\', wera_day, hhmm_char, '_', HF_station_id, '.SORT'));
     [WERA,~,~,~,~] = read_WERA_sort_partial(sort_path);
     fbragg = WERA.fbragg;
+    f0 = WERA.FREQ*10^6;
     
     hhmm_char = char(hhmm_char);
     partial_char = hhmm_char(1:3);
@@ -85,7 +93,7 @@ function P_shortSort = create_ShortSort_P(wera_day, params_path, hhmm, destinati
     end
 
     mat_fname = strcat(targetPath, '\', wera_day, char(string(hhmm-10)), '.mat');
-    save(mat_fname, 'P_shortSort', 't', 'fbragg');
+    save(mat_fname, 'P_shortSort', 't', 'fbragg', 'f0');
 
 end
 

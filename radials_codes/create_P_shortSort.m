@@ -2,6 +2,7 @@ addpath(genpath('..\'));
 
 %% generate short sort mat file
 
+Synology_path = 'Z:';
 days = string({'2022039'});
 short_params = "short_1024_shift_1024_range_100";
 HF_station = 'is1'; %is1: Ashkelon, is2: Ashdod
@@ -19,14 +20,16 @@ hhmms = string({...
                '2100', '2120', '2140', '2200', '2220', '2240', '2300',...
                '2320', '2340'});
 
-%splits = hhmms(31:40);
 splits = hhmms(31:33);
 
-% coordinate of interest
+%% coordinate of interest
+
 %ADCP_shallow = [34.532972 31.670556];
 %ADCP_deep = [34.512833 31.681639];
-in_front_ASH = [34.58777539086895 31.854180076569225];
-in_situ = [34.4092 31.8135];  % 8/2/22 Vector, ADCP, Drone measurements
+%in_front_ASH = [34.58777539086895 31.854180076569225];
+in_situ = [34.4092 31.8135];  % February 8th, 2022 Vector, ADCP, Drone measurements
+
+%%
 
 N_range_cells = 1;  % number of range cell to average
 N_angs = 0;  % number of angles to average (2*N_ang + 1)
@@ -37,6 +40,6 @@ for ii = 1 : length(days)
     for jj = 1 : length(splits)
         sprintf('Starting split: %d out of %d', jj, length(splits))
         split_num = str2double(splits(jj));
-        create_ShortSort_P(day, short_params, split_num, in_front_ASH, HF_station, N_range_cells, N_angs);
+        create_ShortSort_P(Synology_path, day, short_params, split_num, in_situ, HF_station, N_range_cells, N_angs);
     end
 end

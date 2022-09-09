@@ -1,5 +1,7 @@
+%% extract_ang_number.m
 function ang_num = extract_ang_number(fname)
-   
+% extract the angle number from filename of type: yyyydddttttttt_angdeg.asc
+
     id = strfind(fname, '_');
     id = id(end);
     ang_str = fname(id+1:id+3);

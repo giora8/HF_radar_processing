@@ -1,19 +1,23 @@
 %% find_ivonin_peaks.m
-function [f_peaks, sig_vals, acc_vals, partial_f_mat, partial_P_mat] = find_ivonin_peaks(P, undisturbed_vals, freq_norm, plt_flag, method)
+function [f_peaks, sig_vals, acc_vals, partial_f_mat, partial_P_mat] = find_ivonin_peaks(P, undisturbed_vals, freq, plt_flag, method, varargin)
 %% Inputs
 % P - backscattered Doppler spectra of size 1 X 512
 % undisturbed_vals - normalized frequencies of theoretical backscattered
 % [negaative part [psitive part]
 % waves
-% freq_norm - frequency axis of size 1 X 512
+% freq - frequency axis of size 1 X 512
 % plt_flag - true for plot peaks
 % method - type of method to find the peak: 'max' for detect maximal value
 % inside the window. 'centroid' for Calculate centroid inside
 % window
+% varargin - optional additional input: window size
 %% Output
 % f_peaks: measured peaks (slightly different than undisturbed values)
 % f_range: frequency range of the partial section where the peak exist
 % P_range: power values of the partial frequency section where the peak exist
+% sig and acc matrices - values of variance and accuracy of peaks detection
+% partial_f_mat - frequency axis of the extracted section around peak
+% partial_P_mat - power axis of the extracted section around peak
 %
 % -----------------find indices of unditurbed vals-------------------------
     
@@ -23,8 +27,8 @@ function [f_peaks, sig_vals, acc_vals, partial_f_mat, partial_P_mat] = find_ivon
         neg_val = undisturbed_vals(cur_peak, 1);
         pos_val = undisturbed_vals(cur_peak, 2);
 
-        [~, cur_id_neg] = min(abs(freq_norm - neg_val));
-        [~, cur_id_pos] = min(abs(freq_norm - pos_val));
+        [~, cur_id_neg] = min(abs(freq - neg_val));
+        [~, cur_id_pos] = min(abs(freq - pos_val));
         
         undisturbed_ids(cur_peak, 1) = cur_id_neg ;
         undisturbed_ids(cur_peak, 2) = cur_id_pos ;
@@ -32,13 +36,17 @@ function [f_peaks, sig_vals, acc_vals, partial_f_mat, partial_P_mat] = find_ivon
     
 %--------------create window next to each undisturbed peak----------------%
 
-    freq_step = freq_norm(2) - freq_norm(1);
-    window_size = 0.15 ; % [f_B]
-    %window_size = 0.05 ; % [f_B]
-    expand_ids = ceil(window_size / freq_step);
+    freq_step = freq(2) - freq(1);
+    if isempty(varargin)
+        window_size = 0.15 ;
+        expand_ids = ceil(window_size / freq_step);
+    else
+        window_size = varargin{1};
+        expand_ids = ceil(window_size / freq_step);
+    end
     
     if strcmp(method, 'WERA')
-        expand_ids = length(freq_norm)/64;
+        expand_ids = length(freq)/64;
     end
     
     window_inds = zeros(numel(undisturbed_ids), 2);
@@ -66,7 +74,7 @@ function [f_peaks, sig_vals, acc_vals, partial_f_mat, partial_P_mat] = find_ivon
 
     % locate peak next to undisturbed values %
 
-        partial_f = freq_norm(window_inds(cur_spec, 1):window_inds(cur_spec, 2));
+        partial_f = freq(window_inds(cur_spec, 1):window_inds(cur_spec, 2));
         partial_P = P(window_inds(cur_spec, 1):window_inds(cur_spec, 2));
         
         noise = get_noise_value(P);
@@ -124,8 +132,8 @@ function [f_peaks, sig_vals, acc_vals, partial_f_mat, partial_P_mat] = find_ivon
                         f_peaks(a, b) = 0;  % if could not detect peak - fill with zero
                     end
 
-                    temp_id = find(ismember(freq_norm, f_peaks(cur_spec)));
-                    partial_f = freq_norm(temp_id-expand_ids:temp_id+expand_ids);
+                    temp_id = find(ismember(freq, f_peaks(cur_spec)));
+                    partial_f = freq(temp_id-expand_ids:temp_id+expand_ids);
                     partial_P = P(temp_id-expand_ids:temp_id+expand_ids);
                     %partial_P = P(window_inds(cur_spec, 1):window_inds(cur_spec, 2));
 

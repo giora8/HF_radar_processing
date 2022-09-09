@@ -23,6 +23,7 @@ z = z1;
 t = [t1 t2];
 
 % convert to radial and tangential velocity
+% TODO: verify correction of angles
 
 r_hat = 300;  % azimuth of the radial with respect to the north
 alpha_u = r_hat - 270;
@@ -34,4 +35,4 @@ alpha_v = r_hat - 240;
 Vr = u .* cos(deg2rad(330)) + v .* sin(deg2rad(330));
 Vtheta = -u .* sin(deg2rad(330)) + v .* cos(deg2rad(330));
 
-%plotCompHF2ADCP(x_plot, U_all_filt, Vr, Vtheta, t, z, 60, Fs, 1);
+plotCompHF2ADCP(x_plot, U_all_filt, Vr, Vtheta, t, z, 60, Fs, 1);

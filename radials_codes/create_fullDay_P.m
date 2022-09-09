@@ -1,9 +1,15 @@
 %% open_ascii_radial_spectrum.m
-function P_day = create_fullDay_P(wera_day, destination_coord, HF_station_id, N_range_cells, N_angs, sort_file_path)
+function P_day = create_fullDay_P(syn_path, wera_day, destination_coord, HF_station_id, N_range_cells, N_angs, sort_file_path)
 %% Inputs
+% syn_path - Synology drive path ('Z:')
 % wera_day - YYYYDDD format (example: '2021083')
+% destination_coord - [longitude latitude] coordinates of the target
+% HF_station_id - (string) station name 'is1' or 'is2'
+% N_range_cells - (int) number of distances to average
+% N_angs - (int) number of angles to average
+% sort_file_path - path of sort files inside synology server
 %% Output
-% P - spectrum of all range in the .asc file
+% P_day - spectrum of all range in the .asc file
 %
 %------------------ names of all day measurements ------------------------%
 
@@ -50,7 +56,7 @@ function P_day = create_fullDay_P(wera_day, destination_coord, HF_station_id, N_
 
 %----%
 
-basic_path = 'Z:\radials_spectrum\';
+basic_path = strcat(syn_path, '\radials_spectrum\');
 day_path = strcat(basic_path, wera_day, '\');
 
 if strcmp(HF_station_id, 'is1')
@@ -73,6 +79,7 @@ deg_folder_path = strcat(basic_path, wera_day, '\');
 P_day = zeros(length(filenames), length(t));  % [# of measurement a day X time_dim]
 t_day = zeros(length(filenames), length(t));
 fbragg_day = zeros(length(filenames), 1);
+f0_day = zeros(length(filenames), 1);
 
     for ii = 1 : length(filenames)
         [deg_file_list, ~] = get_degrees_files(deg_folder_path, filenames(ii), ANG, N_angs);
@@ -82,6 +89,7 @@ fbragg_day = zeros(length(filenames), 1);
         fname_sort_path = char(strcat(sort_file_path, filenames(ii), '.SORT'));
         [WERA,t,r,~,~] = read_WERA_sort_partial(fname_sort_path);
         fbragg = WERA.fbragg;
+        f0 = WERA.FREQ*10^6;
         
         % averaging over angles %
         P_ang = zeros(length(deg_file_list), length(t)); % [N_ang X time_dim]
@@ -96,6 +104,7 @@ fbragg_day = zeros(length(filenames), 1);
         P_day(ii, :) = mean(P_ang, 1);  % Average over all angles
         t_day(ii, :) = t;
         fbragg_day(ii) = fbragg;
+        f0_day(ii) = f0;
         
     end
 
@@ -106,7 +115,7 @@ if ~exist(targetPath, 'dir')
 end
 
 mat_fname = strcat(targetPath, '\', wera_day, '.mat');
-save(mat_fname, 'P_day', 't_day', 'fbragg_day');
+save(mat_fname, 'P_day', 't_day', 'fbragg_day', 'f0_day');
     
 end
 

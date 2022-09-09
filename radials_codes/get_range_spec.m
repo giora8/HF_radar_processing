@@ -23,7 +23,13 @@ function P_out = get_range_spec(deg_file, r, target_range, num_of_ranges, output
     
     if size(P, 1) ~= length(r)
         diff_r = length(r) - size(P, 1);
-        r = r(1 : end-diff_r);
+        
+        if diff_r > 0
+            r = r(1 : end-diff_r);
+        else
+            P = P(abs(diff_r)+1:end,:);
+        end
+
     end
     
 %     if size(P, 1) ~= length(r)

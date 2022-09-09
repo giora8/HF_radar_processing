@@ -3,7 +3,8 @@
 
 %% read cur_asc file
 close all;
-ftime = 'C:\Giora\TAU\MEPlab\HF_Radar\files\check_duplicates_files\20210600000_izr.cur_asc';
+%ftime = 'C:\Giora\TAU\MEPlab\HF_Radar\files\check_duplicates_files\20210600000_izr.cur_asc';
+ftime= 'Z:\20220381340_izr.cur_asc';
 [IX,IY,U,V,Uer,Ver,KL]=read_WERA_asc_cur(ftime);
 
 U_mat = nan(160, 200);
