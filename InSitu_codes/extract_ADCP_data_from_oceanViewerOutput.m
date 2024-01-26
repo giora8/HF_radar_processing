@@ -46,7 +46,7 @@ z = -double(bottom)+0.1 : double(cell_size) : -bottom+double(N_cells*cell_size);
 %%
 
 t0_index = 55441; % 23/3/21 at 00:00:02
-average_every = 60*60; % 20 minutes
+average_every = 20*60; % 20 minutes
 average_every_index = round(average_every * Fs);
 
 day_to_analyze = 6;
@@ -59,9 +59,8 @@ z = z(1:56);
 
 %%
 
-%Vr = crop_u*cos(deg2rad(30)) - crop_v*cos(deg2rad(60));
-Vr = crop_u*cos(deg2rad(30)) + crop_v*sin(deg2rad(30));
-Vtheta = crop_u*sin(deg2rad(30)) + crop_v*sin(deg2rad(60));
+Vr = -crop_u*sin(deg2rad(30)) + crop_v*cos(deg2rad(30));
+Vtheta = -crop_u*cos(deg2rad(30)) - crop_v*sin(deg2rad(60));
 
 %%
 T1 = 1; T2 = 5;

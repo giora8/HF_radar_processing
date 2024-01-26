@@ -3,7 +3,7 @@ addpath(genpath('..\'));
 %% generate full day mat file
 
 Synology_path = 'Z:';
-days = string({'2021102'});
+days = string({'2021094','2021095','2021096','2021097','2021098','2021099','2021100','2021101','2021105', '2021106'});
 
 %% point of interest
 

@@ -19,7 +19,7 @@ function [U_avg, sig_avg, acc_avg, c0_bragg_avg] = get_U(filename, N_avg, veloci
 % 
 %--------------loading and initializing parameters------------------------%
     
-    g = 9.82; % [m\s]
+    g = 9.81; % [m\s]
     addpath(genpath('..\'));
     load(filename); %#ok<LOAD> % including: P_day, f_bragg_day, f0_day, t_day
     
@@ -52,12 +52,17 @@ function [U_avg, sig_avg, acc_avg, c0_bragg_avg] = get_U(filename, N_avg, veloci
                 [f_peaks, sig, acc, ~, ~] = find_ivonin_peaks(P_day(ii, :), [-f_bragg f_bragg], f, 0, peak_detection_type, window);
             end
             
+            f0 = f0;% + 100*10^3;
             fb_neg = f_peaks(1) + f0;
             fb_pos = f_peaks(2) + f0;
-            U(1) = Ce * (f0 - fb_neg) / (f0+fb_neg);
-            U(2) = -Ce * (f0 - fb_pos) / (f0+fb_pos);
+            fb_unper = f_bragg + f0;
+            %U(1) = Ce * (f0 - fb_neg) / (f0+fb_neg);
+            %U(2) = -Ce * (f0 - fb_pos) / (f0+fb_pos);
             res = Ce.*(f(2)-f(1))./(2*f0 + (f(2)-f(1)));
-                    
+            c0_fixed = -Ce * (f0 - fb_unper) / (f0+fb_unper);
+            %c0_fixed = 2*pi / ((Ce/f0)/2);  # THIS IS k !!
+            U(1) = Ce * (f0 - fb_neg) / (f0+fb_neg);% - c0_fixed;
+            U(2) = Ce * (f0 - fb_pos) / (f0+fb_pos);% + c0_fixed;
         else
             
             if isempty(varargin)
@@ -71,10 +76,12 @@ function [U_avg, sig_avg, acc_avg, c0_bragg_avg] = get_U(filename, N_avg, veloci
             f_diff = f_diff .* f_bragg;
             U = lambda_bragg .* f_diff;
             res = (f(2)-f(1)) * lambda_bragg;
+            c0_fixed = sqrt((lambda_bragg*g)/(2*pi));
             
         end
         
-        c0_bragg(ii) = sqrt((lambda_bragg*g)/(2*pi));
+        %c0_bragg(ii) = sqrt((lambda_bragg*g)/(2*pi));
+        c0_bragg(ii) = c0_fixed;
         U_all(ii, 1) = U(1);
         U_all(ii, 2) = U(2);
         U_all(ii, 3) = res;

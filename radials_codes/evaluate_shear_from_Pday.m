@@ -8,7 +8,7 @@ basic_path = 'Z:\radials_spectrum\is1_R_3.5622_Ncells_1_ang_-3_5\';
 %basic_path = 'Z:\radials_spectrum\is1_R_20.9184_Ncells_1_ang_22_22\';
 %basic_path = 'Z:\radials_spectrum\is1_R_3.5622_Ncells_3_ang_1_1\';
 files = dir(basic_path);
-files = files(3:16);
+files = files(24:46);
 c0_all = -10.*ones(H*length(files), 1);
 U_all = -10.*ones(H*length(files), 3); % [negative_peak, positive_peak, resolution]
 eval_metric_all = -10.*ones(H*length(files), 4); % [sigma squared neg, sigma squared pos, acc neg, acc pos]
@@ -18,7 +18,7 @@ for cur_day = 1 : length(files)
     id_zero = id_zero(1);
     
     cur_filename = strcat(basic_path, files(cur_day).name);
-    [cur_U_all, sig_metric, acc_metric, cur_c0] = get_U(cur_filename, average_every, 'Cp', 'centroid', 0.1);
+    [cur_U_all, sig_metric, acc_metric, cur_c0] = get_U(cur_filename, average_every, 'U', 'centroid', 0.1);
     
     c0_all(id_zero:id_zero+size(cur_U_all, 1)-1) = cur_c0;
     U_all(id_zero:id_zero+size(cur_U_all, 1)-1, 1) = cur_U_all(:, 1);
@@ -94,48 +94,49 @@ U_pos_filt = ifft(ifftshift(P1_pos_noise_red)) + mean_U_all(2);
 U_neg_filt = ifft(ifftshift(P1_neg_noise_red)) + mean_U_all(1);
 
 fig=figure; fig.Position = [10 10 1100 450];
-scatter(x_plot, U_pos_filt)
-hold on; scatter(x_plot, U_neg_filt, 'x');
+scatter(x_plot, U_neg_filt, 'x');
+hold on;
+scatter(x_plot, U_pos_filt, 'x')
 hold on; errorbar(x_plot, U_pos_filt, pos_err_plot, 'LineStyle','none');
 hold on; errorbar(x_plot, U_neg_filt, neg_err_plot, 'LineStyle','none');
 hold on;
-%ylim([-ylim_val/2, ylim_val/2]);
+ylim([-ylim_val/2, ylim_val/2]);
 xline(24*length(files)/2,'color', [0.5 0.5 0.5], 'linewidth', 1);
 yline(0,'color', [0.5 0.5 0.5], 'linewidth', 1);
 vals = [1:3:24*length(files) 24*length(files)];
-xlabel('Time [hr]'); ylabel('Velocity [m/s]');
-legend('Positive peak', 'Negative peak', 'box', 'off');
+xlabel('Time [hr]'); ylabel('Celerity [m/s]');
+legend('Negative peak', 'Positive peak', 'box', 'off');
 xlim([1 24*length(files)]);
 
 U_all_filt = [U_neg_filt U_pos_filt];
 
 %% arbitrary profile
-U_pos = U_all(:, 2) - mean_U_all(2);
-U_neg = U_all(:, 1) - mean_U_all(1);
+U_pos = U_pos_filt;
+U_neg = U_neg_filt;
 alphas = -0.2.*zeros(length(U_neg), 1);
-[alpha, beta, m] = evaluate_shear('exp', U_neg_filt, U_pos_filt, c0_all);
-figure(); scatter(x_plot, m);
-title('m');
-
-z = 0 : -0.001 : -3;
-z = z';
-
-UU = zeros(length(z), length(beta));
-for ii = 1 : length(beta)
-    
-    cur_alpha = alpha(ii);
-    cur_beta = beta(ii);
-    cur_m = m(ii);
-    
-    UU(:, ii) = cur_alpha + cur_beta.*exp(cur_m.*z);
-    
-end
+[alpha, beta, m] = evaluate_shear('analytic', U_neg_filt, U_pos_filt, c0_all);
+% figure(); scatter(x_plot, alpha(:, 1));
+% title('m');
+% 
+% z = 0 : -0.001 : -3;
+% z = z';
+% 
+% UU = zeros(length(z), length(beta));
+% for ii = 1 : length(beta)
+%     
+%     cur_alpha = alpha(ii);
+%     cur_beta = beta(ii);
+%     cur_m = m(ii);
+%     
+%     UU(:, ii) = cur_alpha + cur_beta.*exp(cur_m.*z);
+%     
+% end
 
 
 %%
 
 alphas = -0.2.*zeros(length(U_neg), 1);
-[alpha, beta, m] = evaluate_shear('exp', U_neg_filt, U_pos_filt, c0_all);
+[alpha, beta, m] = evaluate_shear('analytic', U_neg_filt, U_pos_filt, c0_all);
 figure(); scatter(x_plot, m);
 title('m');
 
@@ -155,7 +156,7 @@ end
 
 %% linear profile
 
-[alpha, beta, ~] = evaluate_shear('lin', U_neg_filt, U_pos_filt, c0_all);
+[alpha, beta, ~] = evaluate_shear('analytic', U_neg_filt, U_pos_filt, c0_all);
 
 z = 0 : -0.001 : -3;
 z = z';

@@ -27,7 +27,6 @@ function noise = get_noise_value(P)
     noise_mag = mean(P_noise_mag);
     
     % convert back to dB
-    
     noise = pow2db(noise_mag);
 
 end

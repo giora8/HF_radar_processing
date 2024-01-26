@@ -23,8 +23,8 @@ function plotCompHF2ADCP(t_HF, U_HF, Vr_ADCP, Vtheta_ADCP, t_ADCP, z, average_ev
     fig=figure; fig.Position = [10 10 1800 800];
     subplot(13, 9, 1:54);
     y_locs = max(U_HF(:, 1), U_HF(:, 2));
-    U_pos = U_HF(:, 1);
-    U_neg = U_HF(:, 2);
+    U_neg = U_HF(:, 1);
+    U_pos = U_HF(:, 2);
     ylim_val = ceil(max(abs(max(U_HF(:, 1))), abs(min(U_HF(:,1)))));
     scatter(t_HF, U_pos);
     hold on; scatter(t_HF, U_neg, 'x');
@@ -34,11 +34,11 @@ function plotCompHF2ADCP(t_HF, U_HF, Vr_ADCP, Vtheta_ADCP, t_ADCP, z, average_ev
     dp = p2-p1;
     h_q = quiver(p1(1),p1(2),dp(1),dp(2), 2, 'color', [0 0 0], 'linewidth', 2);
     ylim([-ylim_val/2, ylim_val/2]);
-    xline(size(U_HF, 1)/2, 'color', [0.5 0.5 0.5], 'linewidth', 1);
+    xline(max(t_HF)/2, 'color', [0.5 0.5 0.5], 'linewidth', 1);
     yline(0,'color', [0.5 0.5 0.5], 'linewidth', 1);
     xlabel('Time [hr]'); ylabel('Velocity [m/s]');
     legend('Positive peak', 'Negative peak', 'current profile', 'box', 'off');
-    xlim([1 size(U_HF, 1)]);
+    xlim([1 max(t_HF)]);
 
 %-------------------- plot the first vertical profile --------------------%
     

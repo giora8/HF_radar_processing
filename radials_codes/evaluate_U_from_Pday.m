@@ -2,28 +2,32 @@
 
 basic_path = 'Z:\radials_spectrum\is1_R_3.5622_Ncells_1_ang_-3_5\';
 
-average_every = 3;
+average_every = 1;
 H = 72 / average_every;
 dt = 24 / H ;
 
 files = dir(basic_path);
-files = files(3:16);
+%files = files(24:34);
+files = files(24:26);
 
 c0_all = -10.*ones(H*length(files), 3);
 U_all = -10.*ones(H*length(files), 3); % [negative_peak, positive_peak, resolution]
 eval_metric_all = -10.*ones(H*length(files), 4); % [sigma squared neg, sigma squared pos, acc neg, acc pos]
+scale_c0 = -10.*ones(H*length(files), 3);
 for cur_day = 1 : length(files)
 
     id_zero = find(U_all == -10);
     id_zero = id_zero(1);
     
     cur_filename = strcat(basic_path, files(cur_day).name);
-    [cur_U_all, sig_metric, acc_metric, cur_c0] = get_U(cur_filename, average_every, '', 'centroid', 0.1);
+    [cur_U_all, sig_metric, acc_metric, cur_c0] = get_U(cur_filename, average_every, 'Cp', 'centroid', 0.05);
     
     c0_all(id_zero:id_zero+size(cur_U_all, 1)-1) = cur_c0;
     U_all(id_zero:id_zero+size(cur_U_all, 1)-1, 1) = cur_U_all(:, 1);
     U_all(id_zero:id_zero+size(cur_U_all, 1)-1, 2) = cur_U_all(:, 2);
     U_all(id_zero:id_zero+size(cur_U_all, 1)-1, 3) = cur_U_all(:, 3);
+    
+    scale_c0(id_zero:id_zero+size(cur_U_all, 1)-1, 1:2) = cur_U_all(:, 1:2) ./ cur_c0;
     
     eval_metric_all(id_zero:id_zero+size(cur_U_all, 1)-1, 1:2) = sig_metric;
     eval_metric_all(id_zero:id_zero+size(cur_U_all, 1)-1, 3:4) = acc_metric;
@@ -39,23 +43,26 @@ neg_err_plot = max(neg_acc,U_all(:, 3));
 
 %% plot results
 
-U_all(abs(U_all)>2) = mean(U_all(:));
-U_all(isnan(U_all)) = nanmean(U_all(:));
-x_plot = 1:length(U_all);
+%U_all(abs(U_all)>2) = mean(U_all(:));
+%U_all(isnan(U_all)) = nanmean(U_all(:));
+%currents_all = [U_all(:, 1)-c0_all(:, 1),  U_all(:, 2)+c0_all(:, 1)]; 
+x_plot = 1:length(U_all(:, 1));
 x_plot = x_plot .* dt;
 ylim_val = ceil(max(abs(max(U_all(:, 1))), abs(min(U_all(:,1)))));
 
 fig=figure; fig.Position = [10 10 1100 450];
-hold on; scatter(x_plot, U_all(:, 2));
-hold on; scatter(x_plot, U_all(:, 1), 'x');
-hold on; errorbar(x_plot, U_all(:, 2), pos_err_plot, 'LineStyle','none');
-hold on; errorbar(x_plot, U_all(:, 1), neg_err_plot, 'LineStyle','none');
-ylim([-ylim_val/2, ylim_val/2]);
+hold on; scatter(x_plot, U_all(:, 1), 60);
+hold on; scatter(x_plot, -U_all(:, 2), 60, 'x');
+hold on; plot(x_plot, c0_all(:, 1), 'color', [0.5 0.5 0.5], 'LineStyle', '--', 'LineWidth', 2);
+%hold on; errorbar(x_plot, U_all(:, 2), pos_err_plot, 'LineStyle','none');
+%hold on; errorbar(x_plot, U_all(:, 1), neg_err_plot, 'LineStyle','none');
+%ylim([-ylim_val/2, ylim_val/2]);
 xline(max(x_plot)/2,'color', [0.5 0.5 0.5], 'linewidth', 1);
-yline(0,'color', [0.5 0.5 0.5], 'linewidth', 1);
+%yline(0,'color', [0.5 0.5 0.5], 'linewidth', 1);
 vals = [1:average_every:max(x_plot) max(x_plot)];
-xlabel('Time [hr]'); ylabel('Velocity [m/s]');
-legend('Positive peak', 'Negative peak', 'box', 'off');
+xlabel('Time [hr]'); ylabel('Celerity [m/s]');
+%legend('Positive peak', 'Negative peak', 'C_0 celerity', 'box', 'off', 'FontSize', 10);
+legend('Negative peak', 'Positive peak', 'C_0 value','box', 'off', 'FontSize', 10);
 xlim([1 max(x_plot)]);
 
 %% fft
@@ -63,8 +70,8 @@ xlim([1 max(x_plot)]);
 Fs = 1/dt;
 L = H*length(files);
 
-Y_pos = fft(U_all(:, 2));
-Y_neg = fft(U_all(:, 1));
+Y_pos = fft(U_all(:, 2) - mean(U_all(:, 2)));
+Y_neg = fft(U_all(:, 1)- mean(U_all(:, 1)));
 
 P2_pos = abs(Y_pos/L);
 P1_pos = P2_pos(1:L/2+1);
@@ -90,8 +97,11 @@ Nyquist = 1 / (2*dt);
 df = 1 / (N*dt);
 f = -Nyquist : df : Nyquist - df;
 
-P1_pos = fftshift(fft(U_pos));
-P1_neg = fftshift(fft(U_neg));
+pos_mean = mean(U_pos);
+neg_mean = mean(U_neg);
+
+P1_pos = fftshift(fft(U_pos-pos_mean));
+P1_neg = fftshift(fft(U_neg-neg_mean));
 
 close all;
 
@@ -132,8 +142,8 @@ title('Negative peak');
 U_pos_filt = ifft(ifftshift(P1_pos_noise_red));
 U_neg_filt = ifft(ifftshift(P1_neg_noise_red));
 
-figure(); scatter(x_plot, U_pos_filt)
-hold on; scatter(x_plot, U_neg_filt, 'x');
+figure(); scatter(x_plot, U_pos_filt+pos_mean)
+hold on; scatter(x_plot, U_neg_filt+neg_mean, 'x');
 hold on;
 ylim([-ylim_val/2, ylim_val/2]);
 xline(24*length(files)/2,'color', [0.5 0.5 0.5], 'linewidth', 1);
@@ -163,20 +173,29 @@ U_pos_filt = ifft(ifftshift(P1_pos_noise_red));
 U_neg_filt = ifft(ifftshift(P1_neg_noise_red));
 
 fig=figure; fig.Position = [10 10 1100 450];
-scatter(x_plot, U_pos_filt)
-hold on; scatter(x_plot, U_neg_filt, 'x');
-hold on; errorbar(x_plot, U_pos_filt, pos_err_plot, 'LineStyle','none');
-hold on; errorbar(x_plot, U_neg_filt, neg_err_plot, 'LineStyle','none');
+scatter(x_plot, U_neg_filt+neg_mean);
+hold on;scatter(x_plot, -(U_pos_filt+pos_mean), 'x');
+hold on; plot(x_plot, c0_all(:, 1), 'color', [0.5 0.5 0.5], 'LineStyle', '--', 'LineWidth', 2);
+
+%hold on; errorbar(x_plot, U_neg_filt+neg_mean, neg_err_plot, 'LineStyle','none');
+%hold on; errorbar(x_plot, U_pos_filt+pos_mean, pos_err_plot, 'LineStyle','none');
 hold on;
-ylim([-ylim_val/2, ylim_val/2]);
+%ylim([-ylim_val/2, ylim_val/2]);
 xline(24*length(files)/2,'color', [0.5 0.5 0.5], 'linewidth', 1);
-yline(0,'color', [0.5 0.5 0.5], 'linewidth', 1);
+%yline(0,'color', [0.5 0.5 0.5], 'linewidth', 1);
 vals = [1:3:24*length(files) 24*length(files)];
-xlabel('Time [hr]'); ylabel('Velocity [m/s]');
-legend('Positive peak', 'Negative peak', 'box', 'off');
+xlabel('Time [hr]'); ylabel('Current [m/s]');
+legend('Negative peak', 'Positive peak', 'box', 'off');
 xlim([1 24*length(files)]);
 
 U_all_filt = [U_neg_filt U_pos_filt];
+%% evaluate shear constants
+
+U_pos_abs = U_pos_filt + pos_mean;
+U_neg_abs = U_neg_filt + neg_mean;
+
+[alpha, beta, m] = evaluate_shear('arbitrary', U_neg_abs, U_pos_abs, c0_all(:, 1));
+
 
 %% Filter the very low frequency
 
