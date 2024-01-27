@@ -1,0 +1,16 @@
+List of coordinate location: (longitude, latitude)
+
+IS1 (Ashkelon) = 34.545 31.665
+IS1 (Ashkelon) radial azimuth = 300
+
+IS2 (Ashdod) = 34.63583 31.83055
+IS2 (Ashdod) radial azimuth =  291
+
+%Ashkelon March-April 2021
+ADCP_shallow = 34.532972 31.670556
+ADCP_deep = 34.512833 31.681639
+
+in_front_ASHDOD = 34.58777539086895 31.854180076569225
+
+% Vector experiment February 8th 2022
+in_situ = 34.4092 31.8135

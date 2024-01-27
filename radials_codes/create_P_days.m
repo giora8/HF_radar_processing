@@ -1,8 +1,13 @@
 addpath(genpath('..\'));
 
+%% get data extraction params from config
+
+fid = fopen('config.conf', 'r');
+config = textscan(fid, '%s %s', 'Delimiter', '=', 'CommentStyle', '%');
+
 %% generate full day mat file
 
-Synology_path = 'Z:';
+Synology_path = config{2}{strcmp(config{1}, 'synology_path')};
 days = string({'2021094','2021095','2021096','2021097','2021098','2021099','2021100','2021101','2021105', '2021106'});
 
 %% point of interest
