@@ -10,8 +10,8 @@ function [R, ANG] = get_station_angle_radi(station_location, target_location, bo
 %
 %-------------------------------------------------------------------------%
 
-    [arclen, az_shallow] = distance(station_location(2), station_location(1), target_location(2), target_location(1));
-    ANG = round(az_shallow - boresight_azimuth);
+    [arclen, azimuth] = distance(station_location(2), station_location(1), target_location(2), target_location(1));
+    ANG = round(azimuth - boresight_azimuth);
     R = deg2km(arclen);
 
 end
