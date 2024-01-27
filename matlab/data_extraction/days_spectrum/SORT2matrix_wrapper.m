@@ -1,6 +1,10 @@
 addpath(genpath('..\..\'));
 
-config = jsondecode(fileread('run_config.json'));
+try
+    config = jsondecode(fileread('../../../run_config.json'));
+catch
+    config = jsondecode(fileread('run_config.json'));
+end
 days = string(configData.extraction_configuration.days_to_analyze);
 
 for ii = 1 : length(days)
