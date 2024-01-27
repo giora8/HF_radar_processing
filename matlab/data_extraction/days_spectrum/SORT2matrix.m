@@ -54,7 +54,7 @@ for ii = 1 : length(filenames)
     f = waitbar(0, sprintf('Starting measurement: %d out of %d', ii, length(filenames)));
     for jj = 1 : length(deg_file_list)
         
-        cur_filename = strcat(target_path, deg_file_list(jj).name);
+        cur_filename = fullfile(target_path, deg_file_list(jj).name);
         P_ang(jj, :) = get_range_spec(cur_filename, r, R, N_range_cells, 'avg');
         waitbar(jj/length(deg_file_list), f, sprintf('Angle progress: %d %% (%d/%d)', floor(jj/length(deg_file_list)*100), ii, length(filenames)));
     end
@@ -66,7 +66,7 @@ for ii = 1 : length(filenames)
     
 end
 
-new_dirname = strcat(HF_station_id, '_R_', num2str(R), '_Ncells_', num2str(N_range_cells), '_ang_', num2str(ANG-N_angs), '_', num2str(ANG+N_angs));
+new_dirname = strcat(HF_station_to_run_name, '_R_', num2str(R), '_Ncells_', num2str(N_range_cells), '_ang_', num2str(ANG-N_angs), '_', num2str(ANG+N_angs));
 targetPath = fullfile(target_path, new_dirname);
 if ~exist(targetPath, 'dir')
    mkdir(targetPath)

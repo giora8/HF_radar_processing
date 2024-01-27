@@ -13,10 +13,9 @@ function [deg_file_list, angle_list] = get_degrees_files(file_path, filename, cl
 
     if contains(filename, '.SORT')
         filename = filename(1:end-5);
-        file_list = dir(strcat(file_path, filename, '*.*'));  
+        file_list = dir(fullfile(file_path, strcat(filename, '*.*')));  
     else
-        %filename = filename(1:end-5);
-        file_list = dir(strcat(file_path, filename, '*.*'));
+        file_list = dir(fullfile(file_path, strcat(filename, '*.*')));
     end
 
 %------------- extract .deg files within wanted angle range --------------%

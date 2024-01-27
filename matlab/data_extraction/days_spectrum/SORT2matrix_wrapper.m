@@ -5,7 +5,7 @@ try
 catch
     config = jsondecode(fileread('run_config.json'));
 end
-days = string(configData.extraction_configuration.days_to_analyze);
+days = string(config.extraction_configuration.days_to_analyze);
 
 for ii = 1 : length(days)
     sprintf('Starting day: %d out of %d', ii, length(days))
