@@ -1,0 +1,159 @@
+%% find_ivonin_peaks.m
+function [f_peaks, sig_vals, acc_vals, partial_f_mat, partial_P_mat] = find_ivonin_peaks(P, undisturbed_vals, freq, plt_flag, method, varargin)
+%% Inputs
+% P - backscattered Doppler spectra of size 1 X 512
+% undisturbed_vals - normalized frequencies of theoretical backscattered
+% [negaative part [psitive part]
+% waves
+% freq - frequency axis of size 1 X 512
+% plt_flag - true for plot peaks
+% method - type of method to find the peak: 'max' for detect maximal value
+% inside the window. 'centroid' for Calculate centroid inside
+% window
+% varargin - optional additional input: window size
+%% Output
+% f_peaks: measured peaks (slightly different than undisturbed values)
+% f_range: frequency range of the partial section where the peak exist
+% P_range: power values of the partial frequency section where the peak exist
+% sig and acc matrices - values of variance and accuracy of peaks detection
+% partial_f_mat - frequency axis of the extracted section around peak
+% partial_P_mat - power axis of the extracted section around peak
+%
+% -----------------find indices of unditurbed vals-------------------------
+    
+    undisturbed_ids = zeros(size(undisturbed_vals));
+    
+    for cur_peak = 1 : size(undisturbed_vals, 1)
+        neg_val = undisturbed_vals(cur_peak, 1);
+        pos_val = undisturbed_vals(cur_peak, 2);
+
+        [~, cur_id_neg] = min(abs(freq - neg_val));
+        [~, cur_id_pos] = min(abs(freq - pos_val));
+        
+        undisturbed_ids(cur_peak, 1) = cur_id_neg ;
+        undisturbed_ids(cur_peak, 2) = cur_id_pos ;
+    end
+    
+%--------------create window next to each undisturbed peak----------------%
+
+    freq_step = freq(2) - freq(1);
+    if isempty(varargin)
+        window_size = 0.15 ;
+        expand_ids = ceil(window_size / freq_step);
+    else
+        window_size = varargin{1};
+        expand_ids = ceil(window_size / freq_step);
+    end
+    
+    if strcmp(method, 'WERA')
+        expand_ids = length(freq)/64;
+    end
+    
+    window_inds = zeros(numel(undisturbed_ids), 2);
+    for cur_win = 1 : size(window_inds, 1)
+        [a, b] = ind2sub(size(undisturbed_ids), cur_win);
+        window_inds(cur_win, 1) = undisturbed_ids(a, b) - expand_ids;
+        window_inds(cur_win, 2) = undisturbed_ids(a, b) + expand_ids;
+    end
+
+%------------------find maximal peak in each window-----------------------%
+   
+    if(plt_flag == 1)
+        N = numel(undisturbed_vals);
+        f = figure(3);
+        f.Position = [100 100 1000 600];
+    end
+
+    f_peaks = zeros(size(undisturbed_vals));
+    partial_f_mat = zeros(size(undisturbed_vals, 1), 1+window_inds(1, 2)-window_inds(1, 1));
+    partial_P_mat = zeros(size(undisturbed_vals, 1), 1+window_inds(1, 2)-window_inds(1, 1));
+    sig_vals = zeros(size(undisturbed_vals));
+    acc_vals = zeros(size(undisturbed_vals));
+    
+    for cur_spec = 1 : numel(undisturbed_ids)
+
+    % locate peak next to undisturbed values %
+
+        partial_f = freq(window_inds(cur_spec, 1):window_inds(cur_spec, 2));
+        partial_P = P(window_inds(cur_spec, 1):window_inds(cur_spec, 2));
+        
+        noise = get_noise_value(P);
+        
+        if plt_flag == 1
+            figure(2); hold on;
+            plot(partial_f, partial_P, 'red');
+        end
+
+        partial_f_mat(cur_spec, :) = partial_f;
+        partial_P_mat(cur_spec, :) = partial_P;
+
+        [a, b] = ind2sub(size(undisturbed_vals), cur_spec);
+        [vals, peak] = findpeaks(partial_P, 'MinPeakDistance', length(partial_P)-2);
+        
+        % sign sections around peaks on the full spectrum plot %
+        
+        if(plt_flag == 1)
+            figure(3);
+            subplot(N/ceil(N/2), ceil(N/2), cur_spec);
+            findpeaks(partial_P, partial_f, 'MinPeakDistance', max(partial_f)-min(partial_f)-0.0001);
+            hold on;
+            xline(undisturbed_vals(a, b),'--k');
+            if(cur_spec == 1 || cur_spec == 4)
+                ylabel('Backscattered Power [dB]');
+            end
+            if(cur_spec <=6 && cur_spec >= 4)
+                xlabel('normalized frequency [f_B]');
+            end 
+        end
+        
+        % return peak values for 'max' option
+        
+            if strcmp(method, 'max')
+                if (~isempty(peak))
+                    [~, max_id] = max(vals);
+                    f_peaks(a, b) = partial_f(peak(max_id));
+                    [wera_peak, snr] = getWERACurrent(partial_f, partial_P, noise);
+                    [sig, acc] = getAcc(partial_f, snr, wera_peak);
+                    sig_vals(a, b) = sig;
+                    acc_vals(a, b) = acc;
+                else
+                    f_peaks(a, b) = 0;  % if could not detect peak - fill with zero
+                end
+
+            % return peak values for 'centroid'\'WERA' option
+
+            else
+                if ~strcmp(method, 'max')
+                    %% centroid OR WERA methods
+                    if (~isempty(peak))
+                        [~, max_id] = max(vals);
+                        f_peaks(a, b) = partial_f(peak(max_id));
+                    else
+                        f_peaks(a, b) = 0;  % if could not detect peak - fill with zero
+                    end
+
+                    temp_id = find(ismember(freq, f_peaks(cur_spec)));
+                    partial_f = freq(temp_id-expand_ids:temp_id+expand_ids);
+                    partial_P = P(temp_id-expand_ids:temp_id+expand_ids);
+                    %partial_P = P(window_inds(cur_spec, 1):window_inds(cur_spec, 2));
+
+                    [wera_peak, snr] = getWERACurrent(partial_f, partial_P, noise);
+                    [sig, acc] = getAcc(partial_f, snr, wera_peak);
+                        %%
+                        if strcmp(method, 'centroid')
+                            peak_loc = trapz(partial_f, partial_f .* db2pow(partial_P)) / trapz(partial_f, db2pow(partial_P));
+                            f_peaks(a, b) = peak_loc;
+
+                        else
+                            if strcmp(method, 'WERA')
+                                f_peaks(a, b) = wera_peak;
+                            end
+                        end
+                end
+            end
+     
+        sig_vals(a, b) = sig;
+        acc_vals(a, b) = acc;
+    end
+    
+end
