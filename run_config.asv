@@ -25,14 +25,16 @@
 	},
 	"shear_calculation_configuration": {
        "run_shear_calculation": true,
-       "run_existing_extraction_path":  "Z:\\radials_spectrum\\is1_R_3.5622_Ncells_1_ang_-3_5",,
-       "days_to_analyze": ["2021105", "2021106"],
+       "run_existing_extraction_path": "C:\\Giora\\TAU\\MEPlab\\HF_Radar\\files\\is1_R_3.5622_Ncells_1_ang_-3_5",
+       "days_to_analyze": ["2021095", "2021096", "2021097", "2021097", "2021097", "2021097", "2021097", "2021097", "2021097", "2021097"],
        "number_of_measurements_to_average": 3,
        "peak_detection_method": "centroid",
        "window_size_factor": 64,
        "filter_params": {
            "f_tides": 0.035417,
-           "f_upper": 0.15
-    }
+           "f_upper": 0.15,
+           "fields_to_smooth": ["c_negative_peak", "c_positive_peak", "c_unperturbed"]
+       },
+        "model": "linear"
     }
 }

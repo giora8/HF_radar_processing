@@ -1,14 +1,15 @@
 %% Calculate velocity values with optional averaging (average_every=3 e.c. 00:00-01:00, 01:00-02:00 etc.)
 
-basic_path = 'Z:\radials_spectrum\is1_R_3.5622_Ncells_1_ang_-3_5\';
+%basic_path = 'Z:\radials_spectrum\is1_R_3.5622_Ncells_1_ang_-3_5\';
+basic_path = 'C:\Giora\TAU\MEPlab\HF_Radar\files\is1_R_3.5622_Ncells_1_ang_-3_5\';
 
-average_every = 1;
+average_every = 3;
 H = 72 / average_every;
 dt = 24 / H ;
 
 files = dir(basic_path);
 %files = files(24:34);
-files = files(24:26);
+files = files(24:48);
 
 c0_all = -10.*ones(H*length(files), 3);
 U_all = -10.*ones(H*length(files), 3); % [negative_peak, positive_peak, resolution]
@@ -44,7 +45,7 @@ neg_err_plot = max(neg_acc,U_all(:, 3));
 %% plot results
 
 %U_all(abs(U_all)>2) = mean(U_all(:));
-%U_all(isnan(U_all)) = nanmean(U_all(:));
+U_all(isnan(U_all)) = nanmean(U_all(:));
 %currents_all = [U_all(:, 1)-c0_all(:, 1),  U_all(:, 2)+c0_all(:, 1)]; 
 x_plot = 1:length(U_all(:, 1));
 x_plot = x_plot .* dt;

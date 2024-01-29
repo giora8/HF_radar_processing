@@ -7,7 +7,7 @@ function averagedVector = block_averaging(inputVector, blockSize)
 %%------------------------block averaging---------------------------------%
 
  remainingPoints = rem(length(inputVector), blockSize);
- second_dim = size(input_vector, 2);
+ second_dim = size(inputVector, 2);
 
  averagedVector = blockproc(inputVector, [blockSize, second_dim], @(blockStruct) mean(blockStruct.data));
  if remainingPoints > 0
