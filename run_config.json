@@ -36,5 +36,15 @@
            "fields_to_smooth": ["c_negative_peak", "c_positive_peak", "c_unperturbed"]
        },
         "model": "linear"
+    },
+    "ADCP": {
+        "burst_path": "C:\\Giora\\TAU\\MEPlab\\HF_Radar\\files\\InSitu_files\\ADCP_Ashkelon_MarchMay2021",
+        "burst_filenames": ["BURSTV_1.mat", "BURSTV_2.mat", "BURSTV_3.mat"],
+        "HF_station": "Ashkelon",
+        "period": {
+            "initial_datetime": "23-Mar-2021 at 00:00:02",
+            "final_datetime": "14-Apr-2021 23:59:57",
+            "average_time_minutes": 60
+        }
     }
 }
