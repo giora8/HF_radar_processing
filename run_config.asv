@@ -50,8 +50,7 @@
     "wind": {
         "data_path": "C:\\Giora\\TAU\\MEPlab\\HF_Radar\\files\\InSitu_files\\wind_data.mat",
         "variables_to_block_average": ["Vx", "Vy"],
-        "variables_to_block_extract": ["time"],
-        "project_data": true,
+               "variables_to_block_extract": ["time"],
         "HF_station": "Ashkelon",
         "period": {
             "type": "posixtime",

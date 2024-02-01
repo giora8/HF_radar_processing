@@ -1,7 +1,10 @@
 function cut_map = adcp_cutter(config, input_map)
-%UNTITLED4 Summary of this function goes here
-%   Detailed explanation goes here
-
+%% Inputs
+% config - system and run configuration
+% input_map - container map including aggregated ADCP measurements
+%% Output
+% cut_map - container_map contains the measurements of specified period
+% 
 cut_map = containers.Map();
 
 datatime_ini = config.ADCP.period.initial_datetime;

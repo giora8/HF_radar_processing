@@ -7,11 +7,13 @@ function adcp_map = adcp_extractor(fname)
 % 
 adcp_map = containers.Map;
 [u, v, z, t_matlab, Fs] = get_uvzt_from_ADCP(fname);
-adcp_map('u') = u;
-adcp_map('v') = v;
-adcp_map('z') = z;
-adcp_map('matlab_time') = t_matlab;
-adcp_map('datetime') = datetime(t_matlab+7200, 'ConvertFrom', 'posixtime');
+id_start = 1;
+min_depth = find(u(:, size(u,2)/2)==0, 1);
+adcp_map('u') = u(1: min_depth-1, id_start: end);
+adcp_map('v') = v(1: min_depth-1, id_start: end);
+adcp_map('z') = z(1, 1:min_depth-1)';
+adcp_map('matlab_time') = t_matlab(id_start:end);
+adcp_map('datetime') = datetime(t_matlab(id_start:end) , 'ConvertFrom', 'datenum');
 adcp_map('ADCP_sampling_rate') = Fs;
     
 end

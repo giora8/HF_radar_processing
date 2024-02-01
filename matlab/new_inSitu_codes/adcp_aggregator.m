@@ -14,6 +14,10 @@ if ~isempty(burst_path)
         keys = file_map.keys();
         for j = 1:length(keys)
             key = keys{j};
+            if strcmp(key, 'z') | strcmp(key, 'ADCP_sampling_rate')
+                 agg_map(key) = file_map(key);
+                 continue
+            end               
             % Check if the key is already in the final map
             if isKey(agg_map, key)
                 % Concatenate values for the existing key
