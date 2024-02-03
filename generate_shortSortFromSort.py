@@ -58,6 +58,7 @@ def evaluate_shortSort_from_sort(h_dict, hours, days, input_file_path, target_pa
             cur_sort_fname = input_file_path + '/' + day + '/' + year + day + h_dict[hour] + '_' + station + '.SORT'
             generateshortSort_from_sort(cur_sort_fname, target_path, year, day, h_dict[hour])
 
+
 def extract_tar_folder(path):
 
     file_list = os.listdir(path)

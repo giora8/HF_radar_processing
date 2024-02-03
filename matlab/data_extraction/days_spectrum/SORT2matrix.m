@@ -53,7 +53,6 @@ for ii = 1 : length(filenames)
     P_ang = zeros(length(deg_file_list), length(t)); % [N_ang X time_dim]
     f = waitbar(0, sprintf('Starting measurement: %d out of %d', ii, length(filenames)));
     for jj = 1 : length(deg_file_list)
-        
         cur_filename = fullfile(target_path, deg_file_list(jj).name);
         P_ang(jj, :) = get_range_spec(cur_filename, r, R, N_range_cells, 'avg');
         waitbar(jj/length(deg_file_list), f, sprintf('Angle progress: %d %% (%d/%d)', floor(jj/length(deg_file_list)*100), ii, length(filenames)));

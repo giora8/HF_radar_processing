@@ -48,13 +48,12 @@
         }
     },
     "wind": {
-        "data_path": "C:\\Giora\\TAU\\MEPlab\\HF_Radar\\files\\InSitu_files\\wind_data.mat",
-        "variables_to_block_average": ["Vx", "Vy"],
-        "variables_to_block_extract": ["time"],
+        "data_path": "C:\\Giora\\TAU\\MEPlab\\HF_Radar\\files\\InSitu_files\\data_202311121746.csv",
+        "columns": ["Station", "Date & Time (Winter)", "Wind direction (°)", "Wind speed (m/s)", "Standard deviation wind direction (°)"],
+        "variables_to_block_average": ["u", "v"],
         "project_data": true,
         "HF_station": "Ashkelon",
         "period": {
-            "type": "posixtime",
             "initial_datetime": "23-Mar-2021 00:00:02",
             "final_datetime": "14-Apr-2021 23:59:57",
             "average_time_minutes": 60

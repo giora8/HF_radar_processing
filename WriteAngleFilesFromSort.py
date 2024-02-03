@@ -1,9 +1,16 @@
 import os
 import numpy as np
 import tarfile
+from argparse import ArgumentParser
 # This Python script take .SORT files from the Synology server and generates ascii files containing the spectrum on each
 # of the desired angles entered by the user. User enters both days in a year and angles. Files automatically transfer to
 # destination on the Synology server: /mnt/synology/WERA/raw_spectrum
+
+
+def _get_parameters():
+    parser = ArgumentParser()
+    parser.add_argument('--json', required=True, help='json of the run')
+    return parser.parse_args()
 
 
 def get_str_ang(ang, init_cur_ang):
@@ -62,7 +69,6 @@ def generate_day_deg(sort_path, days_list, angles):
     :return: .deg file written in '/mnt/synology/WERA/raw_spectrum'
     """
     command = '/home/wera/Fortran/Plott_WERA_Sort_RCs_Beam_ASCII '
-    filename_year = sort_path[-5:-1]
     for day in days_list:
         flag_open_folder = False
         full_path = sort_path + day
@@ -76,8 +82,6 @@ def generate_day_deg(sort_path, days_list, angles):
                 if not flag_open_folder:
                     new_path = '/mnt/synology/WERA/radials_spectrum/' + cur_file[0:4]+day + '/'
                     os.system('mkdir ' + new_path)
-                    """os.system('scp -r ' + cur_file + ' ' + new_path)
-                    os.system('scp -r ' + cur_file[0:-4] + 'RFI ' + new_path)"""
                     flag_open_folder = True
                 for ang in angles:
                     cur_ang = np.array2string(ang)
@@ -103,7 +107,7 @@ def generate_day_deg(sort_path, days_list, angles):
 if __name__ == '__main__':
     station_id = 'is1'  # is1: Ashkelon is2: Ashdod
     year = '2021'
-    days_list = ['102'] # days to analyze
+    days_list = ['102']  # days to analyze
     angles = np.arange(-3, 6, 1)  # angles to calculate
     basic_sort_path = '/mnt/synology/WERA/data/' + station_id + '/raw/' + year + '/'  # basic path the the days will be taken from
 

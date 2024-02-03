@@ -1,7 +1,8 @@
 function cut_map = adcp_cutter(config, input_map)
 %% Inputs
 % config - system and run configuration
-% input_map - container map including aggregated ADCP measurements
+% input_map - container map including aggregated measurements,
+% assuming size of [N X timestamps] (N>1 for ADCP measurements)
 %% Output
 % cut_map - container_map contains the measurements of specified period
 % 

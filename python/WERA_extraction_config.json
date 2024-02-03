@@ -1,0 +1,38 @@
+{
+    "sys_config": {
+	    "Ashkelon": {
+			"name": "is1",
+			"coordinate": [34.545, 31.665],
+			"boresight_angle_azimuth": 300,
+			"SORT_path": "Z:\\data\\is1\\raw"
+		},
+		"Ashdod": {
+			"name": "is2",
+			"coordinate": [34.63583, 31.83055],
+			"boresight_angle_azimuth": 291,
+			"SORT_path": "Z:\\data\\is2\\raw"
+		},
+		"SORT_root_path": "/mnt/synology/WERA/data/",
+		"SORT_ascii_path": "Z:\\radials_spectrum",
+		"short_SORT_ascii_path": "Z:\\radials_spectrum_shortSort"
+	},
+    "SORT2asc": {
+		"station": "Ashkelon",
+      	"period_to_extract": [2021082, 2021085],
+      	"angles_to_extract": [-5, 5],
+      	"Plott_WERA_Sort_RCs_Beam_ASCII path": "/home/wera/Fortran/Plott_WERA_Sort_RCs_Beam_ASCII",
+      	"utils_txt_path": "/home/wera/HF_ADCP_comparison/input.txt"
+  },
+	"SORT2ShortSORT": {
+		"station": "Ashkelon",
+		"period_to_extract": [2021082, 2021085],
+		"hours_to_extract": [1, 24],
+		"short_params": {
+			"num_samples": 512,
+			"shoft_samples": 512,
+			"num_range_cells": 100
+		},
+		"utils_txt_path": "/home/wera/HF_ADCP_comparison/input_shortSort.txt",
+		"SORT2shortSORT_fortran_path": "wera_sort_to_shortsort"
+	}
+}
