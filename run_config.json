@@ -58,5 +58,10 @@
             "final_datetime": "14-Apr-2021 23:59:57",
             "average_time_minutes": 60
         }
+    },
+    "Hs": {
+        "mat_file_path":"C:\\Giora\\TAU\\MEPlab\\HF_Radar\\files\\InSitu_files\\Hs.mat",
+        "time_variable": ["time"],
+        "measurements_variable": ["Hs"]
     }
 }

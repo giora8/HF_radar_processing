@@ -59,6 +59,7 @@ window_size = NFFT / config.shear_calculation_configuration.window_size_factor;
     end
    day_map = containers.Map;
    day_map('timestamp') = timestamps;
+   day_map('datetime') = HFtimestamp2datetime(timestamps)';
    day_map('c_negative_peak') = c_negative_peak;
    day_map('c_positive_peak') = c_positive_peak;
    day_map('c_unperturbed') = c_unperturbed;

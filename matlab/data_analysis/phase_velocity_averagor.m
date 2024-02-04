@@ -11,7 +11,7 @@ allKeys = keys(input_map);
 for i = 1:length(allKeys)
     currentKey = allKeys{i};
     currentArray = input_map(currentKey);
-    if strcmp(currentKey, 'timestamp')
+    if strcmp(currentKey, 'timestamp') || strcmp(currentKey, 'datetime')
         averageMap(currentKey) = block_extraction(currentArray, block_size);
     else
         averagedValue = block_averaging(currentArray, block_size);
