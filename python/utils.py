@@ -24,6 +24,35 @@ def get_str_ang(ang, init_cur_ang):
     return cur_ang
 
 
+def create_angFolder(target_path, year, day, hour, sort_fname, rfi_fname):
+
+    if not os.path.isdir(target_path + '/' + year):
+        os.mkdir(target_path + '/' + year)
+        target_path = target_path + '/' + year
+    else:
+        target_path = target_path + '/' + year
+
+    if not os.path.isdir(target_path + '/' + day):
+        os.mkdir(target_path + '/' + day)
+        target_path = target_path + '/' + day
+    else:
+        target_path = target_path + '/' + day
+
+    if not os.path.isdir(target_path + '/' + hour):
+        os.mkdir(target_path + '/' + hour)
+        target_path = target_path + '/' + hour
+    else:
+        target_path = target_path + '/' + hour
+
+    command = 'cp ' + sort_fname + ' ' + target_path
+    os.system(command)
+
+    command = 'cp ' + rfi_fname + ' ' + target_path
+    os.system(command)
+
+    return target_path
+
+
 def extract_tar_folder(path):
 
     file_list = os.listdir(path)
@@ -50,3 +79,16 @@ def extract_tar_folder(path):
     file_list = os.listdir(path)
     print('finish extracting tar.gz files')
     return file_list
+
+
+def edit_utils_txt_to_shortSORT(config):
+    f = open(config["utils_txt_path"], "w")
+    short_samples = config["short_samples"]
+    shift_samples = config["shift_samples"]
+    range_cells = config["num_range_cells"]
+
+    f.write(short_samples + '\n')
+
+    f.write(shift_samples + '\n')
+    f.write(range_cells + '\n')
+    f.close()

@@ -50,8 +50,10 @@ def generate_day_deg(config, station_id, day, angles_arr):
                     ascii_additional_name = cur_file.rsplit('.', 1)[0] + '_' + cur_ang + 'deg.asc'
                     optional_filename = day_target_path + ascii_additional_name
                     if not os.path.isfile(optional_filename):
-                        gen_deg_command = WERA_fortran_path + ' ' + cur_file + ' < ' + utils_txt_file
-                        os.system(gen_deg_command)
+                        fortran_command = ["./" + config["SORT2ascii"]["Plott_WERA_Sort_RCs_Beam_ASCII_path"], cur_file]
+                        with open(config["SORT2ascii"]["utils_txt_path"], 'r') as input_file:
+                            _ = subprocess.run(fortran_command, stdin=input_file, stdout=subprocess.PIPE,
+                                               stderr=subprocess.PIPE)
                         current_asc_location = os.path.join(day_root_path, ascii_additional_name)
                         target_asc_location = os.path.join(day_target_path, ascii_additional_name)
 
