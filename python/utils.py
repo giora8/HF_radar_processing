@@ -5,6 +5,7 @@ import subprocess
 
 
 def get_str_ang(ang, init_cur_ang):
+    """ get angle value (degrees) as integer and string and return WERA ascii filename for this angle """
     if ang == 0:
         cur_ang = '000'
 
@@ -24,37 +25,8 @@ def get_str_ang(ang, init_cur_ang):
     return cur_ang
 
 
-def create_angFolder(target_path, year, day, hour, sort_fname, rfi_fname):
-
-    if not os.path.isdir(target_path + '/' + year):
-        os.mkdir(target_path + '/' + year)
-        target_path = target_path + '/' + year
-    else:
-        target_path = target_path + '/' + year
-
-    if not os.path.isdir(target_path + '/' + day):
-        os.mkdir(target_path + '/' + day)
-        target_path = target_path + '/' + day
-    else:
-        target_path = target_path + '/' + day
-
-    if not os.path.isdir(target_path + '/' + hour):
-        os.mkdir(target_path + '/' + hour)
-        target_path = target_path + '/' + hour
-    else:
-        target_path = target_path + '/' + hour
-
-    command = 'cp ' + sort_fname + ' ' + target_path
-    os.system(command)
-
-    command = 'cp ' + rfi_fname + ' ' + target_path
-    os.system(command)
-
-    return target_path
-
-
 def extract_tar_folder(path):
-
+    """ get directory path and extract all tar.gz file if there are ones. Return list of all extracted files """
     file_list = os.listdir(path)
     file_gen = (x for x in file_list)
     os.chdir(path)
@@ -80,8 +52,18 @@ def extract_tar_folder(path):
     print('finish extracting tar.gz files')
     return file_list
 
+def edit_utils_to_ascii(config, angle):
+    """ edit the input txt file for the ascii file generation """
+    f = open(config["utils_txt_path"], "w")
+    f.write('X\n')
+    cur_ang = np.array2string(angle)
+    f.write(cur_ang + '\n')
+    f.write('N\n')
+    f.close()
+
 
 def edit_utils_txt_to_shortSORT(config):
+    """ edit the input txt file for the shortSORT file generation """
     f = open(config["utils_txt_path"], "w")
     short_samples = config["short_samples"]
     shift_samples = config["shift_samples"]
@@ -92,3 +74,26 @@ def edit_utils_txt_to_shortSORT(config):
     f.write(shift_samples + '\n')
     f.write(range_cells + '\n')
     f.close()
+
+
+def calculate_ascii_from_SORT(config, cur_ang, input_sort, filename_target):
+    """ function that operate WERA FORTRAN code to extract ascii spectrum file """
+    if not os.path.isfile(filename_target):
+        fortran_command = ["./" + config["SORT2ascii"]["Plott_WERA_Sort_RCs_Beam_ASCII_path"], input_sort]
+        os.chdir(config["sys_config"]["root_WERA_fortran_package"])
+        with open(config["SORT2ascii"]["utils_txt_path"], 'r') as input_file:
+            _ = subprocess.run(fortran_command, stdin=input_file, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+        current_asc_location = input_sort.rsplit('.', 1)[0] + '_' + cur_ang + 'deg' + '.asc'
+        subprocess.run(['mv', current_asc_location, filename_target])
+
+
+def generate_shortSORT_from_single_SORT(config, sort_root_path, target_path):
+    """ function that operate WERA FORTRAN code to extract shortSORT from SORT file """
+    fortran_command = ["./" + config["SORT2ShortSORT"]["SORT2shortSORT_fortran_path path"], sort_root_path]
+    os.chdir(config["sys_config"]["root_WERA_fortran_package"])
+    with open(config["utils_txt_path"], 'r') as input_file:
+        _ = subprocess.run(fortran_command, stdin=input_file, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    WERA_scropt_output_path = os.path.dirname(sort_root_path) + "shortSORT"
+    final_Destination_path = os.path.join(target_path, "shortSORT", os.path.basename(target_path))
+    subprocess.run(['mv', WERA_scropt_output_path, final_Destination_path])

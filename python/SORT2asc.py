@@ -3,7 +3,7 @@ import numpy as np
 from argparse import ArgumentParser
 import json
 import subprocess
-from utils import get_str_ang, extract_tar_folder
+from utils import get_str_ang, extract_tar_folder, edit_utils_to_ascii, calculate_ascii_from_SORT
 # This Python script take .SORT files from the Synology server and generates ascii files containing the spectrum on each
 # of the desired angles entered by the user. User enters all desired information from the config json file.
 
@@ -22,9 +22,7 @@ def generate_day_deg(config, station_id, day, angles_arr):
     :param angles_arr: Angles wanted to be calculated from the .SORT files. Example: angles = np.arange(-12, 13, 1)
     :return: .deg file written in '/mnt/synology/WERA/raw_spectrum'
     """
-    WERA_fortran_path = config["SORT2asc"]["Plott_WERA_Sort_RCs_Beam_ASCII path"]
     target_path = config["sys_config"]["SORT_ascii_path"]
-    utils_txt_file = config["SORT2asc"]["utils_txt_path"]
     day_root_path = os.path.join(config["sys_config"]["SORT_root_path"], station_id, "raw", day[0:4], day[4:])
 
     file_list = os.listdir(day_root_path)
@@ -38,26 +36,13 @@ def generate_day_deg(config, station_id, day, angles_arr):
             os.makedirs(day_target_path, exist_ok=True)
             for ang in angles_arr:
                 cur_ang = np.array2string(ang)
+                cur_ang = get_str_ang(ang, cur_ang)
                 target_file = os.path.join(day_target_path, cur_file.rsplit('.', 1)[0] + '_' + cur_ang + 'deg.asc')
                 if not os.path.isfile(target_file):  # operate calculation only for files that are not exist
-                    f = open(utils_txt_file, "w")
-                    f.write('X\n')
-
-                    f.write(cur_ang + '\n')
-                    f.write('N\n')
-                    f.close()
-                    cur_ang = get_str_ang(ang, cur_ang)
+                    edit_utils_to_ascii(config, cur_ang)
                     ascii_additional_name = cur_file.rsplit('.', 1)[0] + '_' + cur_ang + 'deg.asc'
                     optional_filename = day_target_path + ascii_additional_name
-                    if not os.path.isfile(optional_filename):
-                        fortran_command = ["./" + config["SORT2ascii"]["Plott_WERA_Sort_RCs_Beam_ASCII_path"], cur_file]
-                        with open(config["SORT2ascii"]["utils_txt_path"], 'r') as input_file:
-                            _ = subprocess.run(fortran_command, stdin=input_file, stdout=subprocess.PIPE,
-                                               stderr=subprocess.PIPE)
-                        current_asc_location = os.path.join(day_root_path, ascii_additional_name)
-                        target_asc_location = os.path.join(day_target_path, ascii_additional_name)
-
-                        subprocess.run(['mv', current_asc_location, target_asc_location])
+                    calculate_ascii_from_SORT(config, cur_ang, cur_file, optional_filename)
 
 
 def WeraSORT2ascii(config):

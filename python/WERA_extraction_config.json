@@ -35,5 +35,16 @@
 		},
 		"utils_txt_path": "/home/wera/HF_ADCP_comparison/input_shortSort.txt",
 		"SORT2shortSORT_fortran_path": "wera_sort_to_shortsort"
+	},
+	"ShortSORT2asc": {
+		"station": "Ashkelon",
+		"period_to_extract": [2021082, 2021085],
+		"hours_to_extract": [1, 24],
+		"angles_to_extract": [-5, 5],
+		"short_params": {
+			"short_samples": 512,
+			"shift_samples": 512,
+			"num_range_cells": 100
+		}
 	}
 }

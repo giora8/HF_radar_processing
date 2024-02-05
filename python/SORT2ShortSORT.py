@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 import json
 import subprocess
 from hours_dict import hours_dictionary
-from utils import extract_tar_folder, edit_utils_txt_to_shortSORT
+from utils import extract_tar_folder, edit_utils_txt_to_shortSORT, generate_shortSORT_from_single_SORT
 
 
 def _get_parameters():
@@ -13,14 +13,7 @@ def _get_parameters():
     return parser.parse_args()
 
 
-def generate_shortSORT_from_single_SORT(config, sort_root_path, target_path):
-    fortran_command = ["./" + config["SORT2ShortSORT"]["SORT2shortSORT_fortran_path path"], sort_root_path]
-    os.chdir(config["sys_config"]["root_WERA_fortran_package"])
-    with open(config["utils_txt_path"], 'r') as input_file:
-        _ = subprocess.run(fortran_command, stdin=input_file, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    WERA_scropt_output_path = os.path.dirname(sort_root_path) + "shortSORT"
-    final_Destination_path = os.path.join(target_path, "shortSORT", os.path.basename(target_path))
-    subprocess.run(['mv', WERA_scropt_output_path, final_Destination_path])
+
 
 
 def SORT2ShortSORT(config):
@@ -42,7 +35,7 @@ def SORT2ShortSORT(config):
     os.makedirs(params_path, exist_ok=True)
 
     for day in every_day_to_run:
-        day_string = str(day)
+        day_string = str(day)  # [yyyyddd]
         sort_root_path = os.path.join(SORT_root_path, day_string[0:4], day_string[4:])
 
         file_list = os.listdir(sort_root_path)
@@ -52,7 +45,7 @@ def SORT2ShortSORT(config):
         for hour in every_hour_to_run:
             hour_string = hours_dictionary[hour]
             hour_SORT_root_path = os.path.join(sort_root_path, day_string + hour_string + "_" + station_id + ".SORT")
-            date_target_path = os.path.join(params_path, day)
+            date_target_path = os.path.join(params_path, day_string)
             os.makedirs(date_target_path, exist_ok=True)
             hour_target_path = os.path.join(date_target_path, "shortSORT_", hour_string)
             if not os.path.isdir(hour_target_path):
