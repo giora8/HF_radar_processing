@@ -1,0 +1,36 @@
+{
+    "sys_config": {
+	    "Ashkelon": {
+			"name": "is1",
+			"coordinate": [34.545, 31.665],
+			"boresight_angle_azimuth": 300,
+			"SORT_path": "Z:\\data\\is1\\raw"
+            "chirp_duration_sec": 0.26,
+            "total_SORT_time_min": 17.75
+		},
+		"Ashdod": {
+			"name": "is2",
+			"coordinate": [34.63583, 31.83055],
+			"boresight_angle_azimuth": 291,
+			"SORT_path": "Z:\\data\\is2\\raw"
+            "chirp_duration_sec": 0.26,
+            "total_SORT_time_min": 17.75
+		},	
+        "short_SORT_root_path": "Z:\\data",
+		"short_SORT_ascii_path": "Z:\\radials_spectrum_shortSort",
+        "output_path": "Z:\\internal_waves\\internal_waves_matrices"
+	},
+	"extraction_configuration": {
+		"HF_station": "Ashkelon",
+		"days_to_analyze": ["2021105", "2021106"],
+		"division_params": {
+            "short_samples": 512,
+            "shift_samples": 512,
+            "num_range_cells": 100
+        },
+        "hours_to_run":[1, 24],
+        "range": 50,
+        "distance": 40,
+        "angles": [-30, 30]
+	}
+}
