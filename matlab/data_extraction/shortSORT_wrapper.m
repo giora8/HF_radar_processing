@@ -45,7 +45,7 @@ input_map('end_time') = end_time;
 for ii = 1 : length(days_to_run)
     current_day = days_to_run(ii);
     day_map = generate_internal_wave_container(input_map, current_day);
-    mat_name = strcat(station_id, '_cell_', cell_size, '_step_', step_size, '_distance_', range, '_ang_', string(max(angles_borders)), '_day_', current_day, '_from_', start_time, '_to_', end_time, '.mat');
+    mat_name = strcat(station_id, '_cell_', cell_size, '_step_', step_size, '_distance_', range, '_ang_', string(min(angles_borders)), '_', string(max(angles_borders)), '_day_', current_day, '_from_', start_time, '_to_', end_time, '.mat');
     fname = fullfile(config.sys_config.output_path, mat_name);
     save(fname, day_map);
 end
