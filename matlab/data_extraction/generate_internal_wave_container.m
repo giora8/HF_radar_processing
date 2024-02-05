@@ -97,7 +97,7 @@ deg_file_list = deg_file_list(3:end);
                         sort_fname = strcat(sort_folder, '\', cur_fname(1:17), '.SORT');
                         [WERA,t,r,~,~] = read_WERA_sort_partial(char(sort_fname));
 
-                        f = create_frequency_axis(t);
+                        f = time2frequency_axis(t);
                         if r(1) < 0
                             Rs(end+1, :) = r(2:R+1);
                         else
