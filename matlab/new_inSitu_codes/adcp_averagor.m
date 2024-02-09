@@ -8,7 +8,12 @@ function averageMap = adcp_averagor(config, input_map)
 averageMap = containers.Map;
 t_matlab = input_map('matlab_time');
 dt_min = (t_matlab(2) - t_matlab(1)) * 24 * 60;
-block_size = round(config.ADCP.period.average_time_minutes / dt_min);
+R = config.ADCP.period.average_time_minutes / dt_min;
+if rem(floor(R * 10), 10) == 5
+    block_size = floor(R);
+else
+    block_size = round(R);
+end
 
 allKeys = input_map.keys();
 for ii = 1 : length(allKeys)

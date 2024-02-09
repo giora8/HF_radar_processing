@@ -59,12 +59,6 @@ date6 = datetime('2021-04-11 13:00:00');
 
 start_time = date1;
 end_time = date2;
-
-indices_alpha = datetime_HF >= start_time & datetime_HF <= end_time;
-indices_adcp = datetime_adcp >= start_time & datetime_adcp <= end_time;
-indices_ims = datetime_ims >= start_time & datetime_ims <= end_time;
-indices_Hs = datetime_Hs >= start_time & datetime_Hs <= end_time;
-
 %% plot peak evaluation and accuracy
 
 negative_peak = smooth_map('c_negative_peak') - smooth_map('c_unperturbed');
@@ -73,27 +67,11 @@ errorbar_negative = avg_map('accuracy_negative_peak');
 positive_peak = smooth_map('c_positive_peak') + smooth_map('c_unperturbed');
 errorbar_positive = avg_map('accuracy_positive_peak');
 
-fig=figure; fig.Position = [10 10 1100 700];
-subplot(2, 1, 1);
+fig=figure; fig.Position = [10 10 1100 450];
 errorbar(datetime_HF, negative_peak, errorbar_negative);
 hold on;
 errorbar(datetime_HF, positive_peak, errorbar_positive);
- ylabel('constant current estimation [m/s]', 'FontSize', 12)
-xlim([min(datetime_HF), max(datetime_HF)])
-legend({'c_{negative peak} - c_0', 'c_{positive peak} - c_0'}, 'Box', 'off', 'Location','best', 'FontSize', 12);
-set(gca, 'FontSize', 12);
 
-subplot(2, 1, 2);
-errorbar(datetime_HF(indices_alpha), negative_peak(indices_alpha), errorbar_negative(indices_alpha));
-hold on;
-errorbar(datetime_HF(indices_alpha), positive_peak(indices_alpha), errorbar_positive(indices_alpha));
-
-xlim([start_time-hours(1), end_time+hours(1)])
-legend({'c_{negative peak} - c_0', 'c_{positive peak} - c_0'}, 'Box', 'off', 'Location','best', 'FontSize', 12);
-xlabel('date', 'FontSize', 12); ylabel('constant current estimation [m/s]', 'FontSize', 12)
-set(gca, 'FontSize', 12);
-
-%% add real alpha periods
 xline(date1, 'black--', 'LineWidth', 2)
 xline(date2, 'black--', 'LineWidth', 2)
 
@@ -104,7 +82,7 @@ xline(date5, 'black--', 'LineWidth', 2)
 xline(date6, 'black--', 'LineWidth', 2)
 
 xlim([min(datetime_HF), max(datetime_HF)])
-legend({'c_{negative peak} - c_0', 'c_{positive peak} - c_0', 'real \alpha periods'}, 'Box', 'off', 'Location','best', 'FontSize', 12);
+legend({'c_{negative peak} - c_0', 'c_{positive peak} - c_0', 'real[\alpha] periods'}, 'Box', 'off', 'Location','best', 'FontSize', 12);
 xlabel('date', 'FontSize', 12); ylabel('constant current estimation [m/s]', 'FontSize', 12)
 set(gca, 'FontSize', 12);
 
@@ -122,9 +100,8 @@ xline(date4, 'black--', 'LineWidth', 2)
 xline(date5, 'black--', 'LineWidth', 2)
 xline(date6, 'black--', 'LineWidth', 2)
 
-legend({'Wind', 'real \alpha periods'}, 'Box', 'off', 'Location','best', 'FontSize', 12);
-xlabel('date', 'FontSize', 12); ylabel('Wind along radial [m/s]', 'FontSize', 12)
-set(gca, 'FontSize', 12);
+xlabel('date');
+ylabel('Wind along radial [m/sec]')
 
 %% plot timeseries - Hs
 fig=figure; fig.Position = [10 10 1100 450];
@@ -142,51 +119,18 @@ xline(date6, 'black--', 'LineWidth', 2)
 xlabel('date');
 ylabel('H_s [m]');
 
+%% timeseries indcies
+indices_alpha = datetime_HF >= start_time & datetime_HF <= end_time;
+indices_adcp = datetime_adcp >= start_time & datetime_adcp <= end_time;
+indices_ims = datetime_ims >= start_time & datetime_ims <= end_time;
+indices_Hs = datetime_Hs >= start_time & datetime_Hs <= end_time;
+
 %% wind & shear timeseries
 fig=figure; fig.Position = [10 10 1100 450];
-yyaxis left; plot(datetime_ims, abs(Vr_ims));
-ylabel('|Wind| [m/s]', 'FontSize', 12)
-yyaxis right; plot(datetime_HF(indices_alpha), abs(a2(indices_alpha)), 'LineStyle', '-', 'Marker', 'o')
-xlabel('date', 'FontSize', 12);
-ylabel('|\alpha| [1/s]', 'FontSize', 12);
-xlim([start_time-hours(18), end_time+hours(18)]);
-legend({'Wind', 'Shear parameter'}, 'Box', 'off', 'FontSize', 12, 'Location', 'best')
-set(gca, 'FontSize', 12);
-
-%% Hs & shear timeseries
-fig=figure; fig.Position = [10 10 1100 450];
-yyaxis left; plot(datetime_Hs, Hs);
-ylabel('Hs [m]')
-yyaxis right; plot(datetime_HF(indices_alpha), abs(a2(indices_alpha)), 'LineStyle', '-', 'Marker', 'o')
-ylabel('|\alpha| [1/s]');
-xlim([start_time-hours(18), end_time+hours(18)]);
-legend({'Hs', 'Shear parameter'}, 'Box', 'off', 'FontSize', 12, 'Location', 'best')
-set(gca, 'FontSize', 12);
-
-%% ADCP & shear timeseries
-fig=figure; fig.Position = [10 10 1100 450];
-yyaxis left; plot(datetime_adcp, abs(Vr_adcp(end, :)));
-ylabel('Current [m/s]')
-yyaxis right; plot(datetime_HF(indices_alpha), abs(a2(indices_alpha)), 'LineStyle', '-', 'Marker', 'o');
-ylabel('|\alpha| [1/s]');
-xlim([start_time-hours(18), end_time+hours(18)]);
-legend({'Current at z=-6 m', 'Shear parameter'}, 'Box', 'off', 'FontSize', 12, 'Location', 'best')
-set(gca, 'FontSize', 12);
-
-%% ADCP current profiles
-Vr_adcp_period = Vr_adcp(:, indices_adcp);
-z = projected_map_adcp('z');
-mean_profile = mean(Vr_adcp_period, 2);
-std_profile = std(Vr_adcp_period, [], 2);
-fig=figure; fig.Position = [10 10 600 450];
-errorbar(mean_profile, z, std_profile', 'Horizontal');
-ylim([min(z), 0]);
-hold on;
-plot([0 0], ylim, 'Color', [0.5, 0.5, 0.5, 0.5], 'LineWidth', 1);  % [0.5, 0.5, 0.5] is gray, and 0.5 is the transparency
-legend({'current'}, 'Box', 'off', 'FontSize', 12, 'Location', 'best')
-xlabel('Current [m/s]', 'FontSize', 12);
-ylabel('Depth [m]', 'FontSize', 12);
-set(gca, 'FontSize', 12);
+yyaxis left; plot(datetime_ims, Vr_ims);
+ylabel('Wind [m/s]')
+yyaxis right; plot(datetime_HF(indices_alpha), a2(indices_alpha))
+ylabel('/alpha [1/s]')
 
 %% shear-wind-adcp relation
 fig=figure; fig.Position = [10 10 1100 450];
@@ -203,3 +147,7 @@ xlabel('date', 'FontSize', 12); ylabel('Current [m/s]', 'FontSize', 12)
 c = colorbar;
 c.Label.String = '\alpha [1/sec]';
 c.Label.FontSize = 12;
+
+%% shear-Hs relation
+fig=figure; fig.Position = [10 10 1100 450];
+scatter(datetime_Hs(indices), Hs(indices), 50, real(a2(indices_alpha)'), 'filled'); ylabel('Hs [m/s]');
