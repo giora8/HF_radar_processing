@@ -23,7 +23,9 @@ agg_map_adcp = adcp_aggregator(config);
 cut_map_adcp = adcp_cutter(config, agg_map_adcp);
 avg_map_adcp = adcp_averagor(config, cut_map_adcp);
 projected_map_adcp = adcp_projection(config, avg_map_adcp);
+projected_map_adcp_with_alpha_hat = adcp_gradientor(config, projected_map_adcp);
 Vr_adcp = projected_map_adcp('Vr');
+alpha_hat = projected_map_adcp_with_alpha_hat('alpha_hat');
 datetime_adcp_str = projected_map_adcp('datetime');
 datetime_adcp = str2datetime(datetime_adcp_str);
 
@@ -153,6 +155,17 @@ xlim([start_time-hours(18), end_time+hours(18)]);
 legend({'Wind', 'Shear parameter'}, 'Box', 'off', 'FontSize', 12, 'Location', 'best')
 set(gca, 'FontSize', 12);
 
+%% alpha_hat & shear timeseries
+fig=figure; fig.Position = [10 10 1100 450];
+yyaxis left; plot(datetime_adcp, abs(alpha_hat));
+ylabel('$|\hat{\alpha}|$ [1/s]', 'Interpreter', 'latex', 'FontSize', 12)
+yyaxis right; plot(datetime_HF(indices_alpha), abs(a2(indices_alpha)), 'LineStyle', '-', 'Marker', 'o')
+xlabel('date', 'FontSize', 12);
+ylabel('|\alpha| [1/s]', 'FontSize', 12);
+xlim([start_time-hours(18), end_time+hours(18)]);
+legend({'$\hat{\alpha}$', 'Shear parameter'}, 'Interpreter', 'latex', 'Box', 'off', 'FontSize', 12, 'Location', 'best')
+set(gca, 'FontSize', 12);
+
 %% Hs & shear timeseries
 fig=figure; fig.Position = [10 10 1100 450];
 yyaxis left; plot(datetime_Hs, Hs);
@@ -169,7 +182,7 @@ yyaxis left; plot(datetime_adcp, abs(Vr_adcp(end, :)));
 ylabel('Current [m/s]')
 yyaxis right; plot(datetime_HF(indices_alpha), abs(a2(indices_alpha)), 'LineStyle', '-', 'Marker', 'o');
 ylabel('|\alpha| [1/s]');
-xlim([start_time-hours(18), end_time+hours(18)]);
+xlim([start_time-hours(18), end_time+hours(72)]);
 legend({'Current at z=-6 m', 'Shear parameter'}, 'Box', 'off', 'FontSize', 12, 'Location', 'best')
 set(gca, 'FontSize', 12);
 

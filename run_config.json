@@ -45,6 +45,9 @@
             "initial_datetime": "23-Mar-2021 00:00:02",
             "final_datetime": "14-Apr-2021 23:59:57",
             "average_time_minutes": 60
+        },
+        "gradient_calculation":{
+            "max_depth": 8
         }
     },
     "wind": {
