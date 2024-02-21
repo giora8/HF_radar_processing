@@ -47,7 +47,8 @@
             "average_time_minutes": 60
         },
         "gradient_calculation":{
-            "max_depth": 8
+            "max_depth": 8,
+            "max_depth_fit": 1
         }
     },
     "wind": {

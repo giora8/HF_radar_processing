@@ -26,6 +26,7 @@ projected_map_adcp = adcp_projection(config, avg_map_adcp);
 projected_map_adcp_with_alpha_hat = adcp_gradientor(config, projected_map_adcp);
 Vr_adcp = projected_map_adcp('Vr');
 alpha_hat = projected_map_adcp_with_alpha_hat('alpha_hat');
+alpha_hat_fit = projected_map_adcp_with_alpha_hat('alpha_hat_upperlayer_fit');
 datetime_adcp_str = projected_map_adcp('datetime');
 datetime_adcp = str2datetime(datetime_adcp_str);
 
@@ -62,10 +63,14 @@ date6 = datetime('2021-04-11 13:00:00');
 start_time = date1;
 end_time = date2;
 
-indices_alpha = datetime_HF >= start_time & datetime_HF <= end_time;
+indices_alpha = datetime_HF >= start_time & datetime_HF < end_time;
 indices_adcp = datetime_adcp >= start_time & datetime_adcp <= end_time;
 indices_ims = datetime_ims >= start_time & datetime_ims <= end_time;
 indices_Hs = datetime_Hs >= start_time & datetime_Hs <= end_time;
+
+%% exponential fit profile
+out_map = adcp_exp_fit(smooth_map, projected_map_adcp, 18, 51, b2);
+alpha_hat_upper = out_map('alpha_hat_upper');
 
 %% plot peak evaluation and accuracy
 
@@ -157,14 +162,69 @@ set(gca, 'FontSize', 12);
 
 %% alpha_hat & shear timeseries
 fig=figure; fig.Position = [10 10 1100 450];
-yyaxis left; plot(datetime_adcp, abs(alpha_hat));
-ylabel('$|\hat{\alpha}|$ [1/s]', 'Interpreter', 'latex', 'FontSize', 12)
-yyaxis right; plot(datetime_HF(indices_alpha), abs(a2(indices_alpha)), 'LineStyle', '-', 'Marker', 'o')
+yyaxis left; 
+plot(datetime_adcp, abs(alpha_hat));
+%ylabel('$|\hat{\alpha}|$ [1/s]', 'Interpreter', 'latex', 'FontSize', 12)
+%yyaxis right; 
+hold on;
+plot(datetime_HF(indices_alpha), abs(a2(indices_alpha)), 'LineStyle', '-', 'Marker', 'o', 'color', 'red')
 xlabel('date', 'FontSize', 12);
 ylabel('|\alpha| [1/s]', 'FontSize', 12);
+yyaxis right;
+ax = gca;
+ax.YAxis(2).Color = [0.5, 0.5, 0.5];
+plot(datetime_ims, abs(Vr_ims), 'LineStyle', '--', 'Color', [0.5, 0.5, 0.5]);
+ylabel('|V_r| [m/s]');
 xlim([start_time-hours(18), end_time+hours(18)]);
-legend({'$\hat{\alpha}$', 'Shear parameter'}, 'Interpreter', 'latex', 'Box', 'off', 'FontSize', 12, 'Location', 'best')
+legend({'Shear parameter from ADCP', 'Boundary layer HF shear parameter', 'Wind'}, 'Interpreter', 'latex', 'Box', 'off', 'FontSize', 12, 'Location', 'northwest')
 set(gca, 'FontSize', 12);
+
+%% alpha_hat & shear timeseries & profiles
+fig=figure; fig.Position = [10 10 1300 450];
+subplot(1, 4, [1,2,3]);
+yyaxis left; 
+plot(datetime_adcp, abs(alpha_hat));
+hold on;
+plot(datetime_HF(indices_alpha), abs(a2(indices_alpha)), 'LineStyle', '-', 'Marker', 'o', 'color', 'red')
+hold on; 
+plot(datetime_HF(indices_alpha), abs(alpha_hat_upper(indices_alpha)), 'LineStyle', '-', 'Marker', 'o', 'color', 'g')
+xlabel('date', 'FontSize', 12);
+ylabel('|\alpha| [1/s]', 'FontSize', 12);
+yyaxis right;
+ax = gca;
+ax.YAxis(2).Color = [0.5, 0.5, 0.5];
+plot(datetime_ims, abs(Vr_ims), 'LineStyle', '--', 'Color', [0.5, 0.5, 0.5]);
+ylabel('|V_r| [m/s]');
+yLabelHandle = get(gca, 'YLabel');
+set(yLabelHandle, 'Units', 'normalized', 'Position', [0.999, 0.5, 0]);
+
+xlim([start_time-hours(18), end_time+hours(18)]);
+legend({'Shear parameter from ADCP', 'Boundary layer HF shear parameter', 'upperlayer - ADCP exponential fit', 'Wind'}, 'Interpreter', 'latex', 'Box', 'off', 'FontSize', 12, 'Location', 'northwest')
+set(gca, 'FontSize', 12);
+
+subplot(1, 4, 4);
+z = projected_map_adcp('z');
+Vr_low = Vr_adcp(:, 32);
+Vr_high = Vr_adcp(:, 26);
+
+plot(Vr_high, z);
+hold on;
+plot(Vr_low, z);
+hold on;
+plot([0 0], ylim, 'Color', [0.5, 0.5, 0.5, 0.5], 'LineWidth', 1);
+legend({'high shear parameter', 'low shear parameter'}, 'Box', 'off', 'FontSize', 12, 'Location', 'best')
+xlabel('Current [m/s]', 'FontSize', 12);
+
+yyaxis right;
+ax = gca;
+ax.YAxis(2).Color = [0, 0, 0];
+yticks([-35, -30, -25, -20, -15, -10, -5]);
+yticklabels({'-35', '-30', '-25', '-20', '-15', '-10', '-5'});
+ylabel('Depth [m]', 'FontSize', 12);
+set(gca, 'FontSize', 12);
+yyaxis left;
+set(gca, 'YTickLabel', {});
+
 
 %% Hs & shear timeseries
 fig=figure; fig.Position = [10 10 1100 450];
@@ -201,18 +261,22 @@ xlabel('Current [m/s]', 'FontSize', 12);
 ylabel('Depth [m]', 'FontSize', 12);
 set(gca, 'FontSize', 12);
 
-%% shear-wind-adcp relation
-fig=figure; fig.Position = [10 10 1100 450];
-indices_adcp = datetime_adcp >= start_time & datetime_adcp <= end_time;
-indices_ims = datetime_ims >= start_time & datetime_ims <= end_time;
-indices_alpha = datetime_HF >= start_time & datetime_HF <= end_time;
+%% wind timeseries & peak deviation subplot
+fig=figure; fig.Position = [10 10 1100 750];
+subplot(2, 1, 1);
+plot(datetime_ims, Vr_ims);
+ylabel('Wind along radial [m/s]')
+xlim([start_time-hours(18), datetime_Hs(end)]);
+xline(date1, 'black--', 'LineWidth', 2);
+xline(date2, 'black--', 'LineWidth', 2);
+legend({'Hs', 'storm period'}, 'Box', 'off', 'FontSize', 12, 'Location', 'best')
+set(gca, 'FontSize', 12);
 
-scatter(datetime_adcp, Vr_adcp(end, :), 50, 'Marker', 'x'); ylabel('Vr adcp [m/s]');
+subplot(2, 1, 2);
+errorbar(datetime_HF(indices_alpha), negative_peak(indices_alpha), errorbar_negative(indices_alpha));
 hold on;
-scatter(datetime_ims(indices_ims), Vr_ims(indices_ims), 150, real(a2(indices_alpha)'), 'filled'); ylabel('Vr current [m]');
-xlim([start_time-hour(1), end_time+hour(1)]);
-legend({'Vr at z=0', 'Vr  at z=-6 m'}, 'Box', 'off', 'FontSize', 12, 'Location', 'best')
-xlabel('date', 'FontSize', 12); ylabel('Current [m/s]', 'FontSize', 12)
-c = colorbar;
-c.Label.String = '\alpha [1/sec]';
-c.Label.FontSize = 12;
+errorbar(datetime_HF(indices_alpha), positive_peak(indices_alpha), errorbar_positive(indices_alpha));
+xlim([start_time, end_time]);
+legend({'c_0 - c_{negative peak}', 'c_0 - c_{positive peak}'}, 'Box', 'off', 'Location','best', 'FontSize', 12);
+xlabel('date');
+ylabel('Constant current estimation [m/s]')

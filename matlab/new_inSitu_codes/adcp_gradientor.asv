@@ -14,7 +14,7 @@ high_res_z = 0:-0.01:z(1);
 
 Vr = input_map('Vr');
 alpha_hat = zeros(1, size(Vr, 2));
-alpha_hat_uppermost = zeros(1, size(Vr, 2));
+alpha_hat = zeros(1, size(Vr, 2));
 max_depth = config.ADCP.gradient_calculation.max_depth;
 max_depth_fit = config.ADCP.gradient_calculation.max_depth_fit;
 [~, ind] = min(abs(z + max_depth));
@@ -31,8 +31,8 @@ for ii = 1 : size(Vr, 2)
     fitted_curve = params_fit(1) * exp(params_fit(2) * high_res_z);
     gradient_Vr_fit = gradient(fitted_curve, high_res_z);
     alpha_hat_uppermost(ii) = mean(gradient_Vr_fit(1:ind_fit));
+
 end
 output_map('alpha_hat') = alpha_hat;
-output_map('alpha_hat_upperlayer_fit') = alpha_hat_uppermost;
 end
 
